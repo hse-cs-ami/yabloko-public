@@ -1,6 +1,6 @@
     .code16
     .global _start
-_start:                   #точка входа
+_start:
     mov $banner, %si
     call print_string
 
