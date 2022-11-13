@@ -1,7 +1,9 @@
 asm("jmp main");
 
+#include "vga.h"
+
 int main() {
-    char* video_memory = (char*) 0xb8000;
-    *video_memory = 'X';
+    vga_clear_screen();
+    vga_print_string("hello world");
     return 0;
 }
