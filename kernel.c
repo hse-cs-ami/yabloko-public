@@ -4,6 +4,8 @@ asm("jmp main");
 
 int main() {
     vga_clear_screen();
-    vga_print_string("hello world");
+    for (int i = 0; i < 24; i++) {
+        vga_print_string("hello world\n");
+    }
     return 0;
 }

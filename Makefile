@@ -16,7 +16,7 @@ debug: image.bin
 image.bin: mbr.bin kernel.bin
 	cat $^ >$@
 
-kernel.bin: kernel.o vga.o
+kernel.bin: kernel.o vga.o string.o
 	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
 
 %.o: %.c
