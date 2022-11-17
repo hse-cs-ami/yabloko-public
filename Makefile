@@ -7,17 +7,17 @@ run: image.bin
 
 debug: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
-	i386-elf-gdb \
+	x86_64-elf-gdb \
 		-ex "target remote localhost:1234" \
 		-ex "set architecture i8086" \
-		-ex "break *0x7c00" \
+		-ex "break *0x7c5d" \
 		-ex "continue"
 
 image.bin: mbr.bin kernel.bin
 	cat $^ >$@
 
-kernel.bin: kernel.o vga.o string.o
-	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
+kernel.bin: kernel.o vga.o string.o drivers/ata.o
+	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
 	$(CC) -m32 -ffreestanding -c $< -o $@

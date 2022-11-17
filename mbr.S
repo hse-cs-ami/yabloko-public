@@ -11,11 +11,39 @@ _start:
     jmp . // loop forever
 
 
+.equ ELF32_ENTRY_OFFSET, 0x18
+.equ ELF32_PHDR_OFFSET, 0x1c
+.equ ELF32_PHDR_FILESZ_OFFSET, 4*4
 .equ KERNEL_OFFSET, 0x1000
+
+.equ MBR_SECTORS, 1
+.equ SECTOR_BASE, 1
+.equ ELFHDR_SECTORS, 8
+
+.equ SECTOR_SIZE, 512
+.equ SECTOR_SHIFT, 9
+
 load_kernel:
+    mov $1, %al // sectors to read
+    mov $SECTOR_BASE + MBR_SECTORS, %cl // start after MBR
+    call bios_disk_read
+
+    mov KERNEL_OFFSET + ELF32_ENTRY_OFFSET, %si
+    mov %si, entry // store entry point
+
+    mov KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
+    mov KERNEL_OFFSET + ELF32_PHDR_FILESZ_OFFSET(%di), %ax
+    sub $0x1000, %ax // we won't load the header
+    add $SECTOR_SIZE - 1, %ax
+    shr $SECTOR_SHIFT, %ax // round up to sector count
+
+    mov $SECTOR_BASE + MBR_SECTORS + ELFHDR_SECTORS, %cl //start after ELF header
+    call bios_disk_read
+    ret
+
+bios_disk_read:
+    // expects %al to specify number of sectors, %cl the initial sector
     mov $2, %ah             // read mode
-    mov $2, %al             // sectors to read
-    mov $2, %cl             // start from sector 2
     mov $0, %ch             // cylinder 0
     mov $0, %dh             // head 0
     mov $KERNEL_OFFSET, %bx // bx -> destination
@@ -46,7 +74,8 @@ init_32bit:
     mov $0x90000, %ebp      // 6. setup stack
     mov %ebp, %esp
 
-    call KERNEL_OFFSET      // 7. jump to the kernel
+    movzwl entry, %esi
+    call *%esi              // 7. jump to the kernel
     jmp .                   // 8. loop forever
 
 
@@ -70,6 +99,11 @@ boot_drive:
 banner:
     .asciz "YABLOKO bootloader started\r\n"
 
+    .balign 2
+entry:
+    .word 0
+
+    .balign 4
 gdt_start:
     .quad 0x0 // null descriptor
 
