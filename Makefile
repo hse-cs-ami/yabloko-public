@@ -19,7 +19,10 @@ debug: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-image.bin: mbr.bin kernel.bin
+fs.img: kernel.bin tools/mkfs
+	tools/mkfs $@ $<
+
+image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o vga.o string.o drivers/ata.o
@@ -29,7 +32,7 @@ kernel.bin: kernel.o vga.o string.o drivers/ata.o
 	$(CC) -m32 -ffreestanding -c -g $< -o $@
 
 %.o: %.S
-	$(CC) -m32 $^ -c -g -o $@
+	$(AS) --32 -g $^ -o $@
 
 mbr.bin: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
@@ -38,4 +41,7 @@ mbr.elf: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.bin *.o
+	rm -f *.bin *.o tools/mkfs
+
+tools/%: tools/%.c
+	gcc -Wall -Werror -g $^ -o $@

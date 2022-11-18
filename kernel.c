@@ -1,8 +1,18 @@
+asm(".asciz \"kernel start\"");
+
 #include "vga.h"
+#include "drivers/ata.h"
+#include "drivers/misc.h"
 
 void _start() {
+    char buf[512];
+
     vga_clear_screen();
-    for (int i = 0; i < 24; i++) {
-        vga_print_string("hello world\n");
-    }
+    vga_print_string("YABLOKO\n");
+
+    read_sectors_ATA_PIO((uint32_t)buf, 10, 1);
+    vga_print_string(buf);
+
+    asm("hlt");
+    qemu_shutdown();
 }

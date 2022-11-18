@@ -22,7 +22,7 @@ ERR: a 1 indicates that an error occured. An error code has been placed in the e
 #define STATUS_DF 0x20
 #define STATUS_ERR 0x01
 
-//This is really specific to out OS now, assuming ATA bus 0 master 
+//This is really specific to our OS now, assuming ATA bus 0 master
 //Source - OsDev wiki
 static void ATA_wait_BSY();
 static void ATA_wait_DRQ();
@@ -30,22 +30,22 @@ void read_sectors_ATA_PIO(uint32_t target_address, uint32_t LBA, uint8_t sector_
 {
 
 	ATA_wait_BSY();
-	port_byte_out(0x1F6,0xE0 | ((LBA >>24) & 0xF));
-	port_byte_out(0x1F2,sector_count);
+	port_byte_out(0x1F6, 0xE0 | ((LBA >>24) & 0xF));
+	port_byte_out(0x1F2, sector_count);
 	port_byte_out(0x1F3, (uint8_t) LBA);
 	port_byte_out(0x1F4, (uint8_t)(LBA >> 8));
-	port_byte_out(0x1F5, (uint8_t)(LBA >> 16)); 
-	port_byte_out(0x1F7,0x20); //Send the read command
+	port_byte_out(0x1F5, (uint8_t)(LBA >> 16));
+	port_byte_out(0x1F7, 0x20); //Send the read command
 
 	uint16_t *target = (uint16_t*) target_address;
 
-	for (int j =0;j<sector_count;j++)
+	for (int j = 0; j < sector_count; j++)
 	{
 		ATA_wait_BSY();
 		ATA_wait_DRQ();
-		for(int i=0;i<256;i++)
+		for(int i = 0; i < 256; i++)
 			target[i] = port_word_in(0x1F0);
-		target+=256;
+		target += 256;
 	}
 }
 
@@ -56,7 +56,7 @@ void write_sectors_ATA_PIO(uint32_t LBA, uint8_t sector_count, uint32_t* bytes)
 	port_byte_out(0x1F2,sector_count);
 	port_byte_out(0x1F3, (uint8_t) LBA);
 	port_byte_out(0x1F4, (uint8_t)(LBA >> 8));
-	port_byte_out(0x1F5, (uint8_t)(LBA >> 16)); 
+	port_byte_out(0x1F5, (uint8_t)(LBA >> 16));
 	port_byte_out(0x1F7,0x30); //Send the write command
 
 	for (int j =0;j<sector_count;j++)
@@ -72,9 +72,9 @@ void write_sectors_ATA_PIO(uint32_t LBA, uint8_t sector_count, uint32_t* bytes)
 
 static void ATA_wait_BSY()   //Wait for bsy to be 0
 {
-	while(port_byte_in(0x1F7)&STATUS_BSY);
+	while (port_byte_in(0x1F7) & STATUS_BSY);
 }
 static void ATA_wait_DRQ()  //Wait fot drq to be 1
 {
-	while(!(port_byte_in(0x1F7)&STATUS_RDY));
+	while(!(port_byte_in(0x1F7) & STATUS_RDY));
 }
