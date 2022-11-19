@@ -54,8 +54,11 @@ bios_disk_read:
 
 
 switch_to_32bit:
+    mov	$2, %al
+    out	%al, $0x92          // enable A20
+
     cli                     // 1. disable interrupts
-    lgdt gdt_descriptor    // 2. load GDT descriptor
+    lgdt gdt_descriptor     // 2. load GDT descriptor
     mov %cr0, %eax
     or $1, %eax             // 3. enable protected mode
     mov %eax, %cr0
