@@ -27,15 +27,20 @@ debug: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: kernel.bin tools/mkfs
+fs.img: kernel.bin tools/mkfs user/false
 	tools/mkfs $@ $<
+
+LDFLAGS=-m elf_i386
+
+user/%: user/%.o user/crt.o
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x101000 $^
 
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 	string.o drivers/ata.o cpu/vectors.o cpu/idt.o drivers/uart.o
-	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
 	$(CC) -m32 -ffreestanding -Wall -Werror -c -g $< -o $@
