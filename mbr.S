@@ -5,10 +5,18 @@ _start:
     mov $banner, %si
     call print_string
 
+    call get_drive_geometry
     call load_kernel
     call switch_to_32bit
 
+    hlt
     jmp . // loop forever
+
+get_drive_geometry:
+    mov $8, %ah
+    mov boot_drive, %dl
+    int $0x13
+    // TODO
 
 
 .equ ELF32_ENTRY_OFFSET, 0x18
@@ -53,15 +61,30 @@ load_kernel:
 
 bios_disk_read:
     // expects %al to specify number of sectors, %cl the initial sector
-    mov $2, %ah             // read mode
+    xor %ah, %ah
+    mov %ax, %si
     mov $0, %ch             // cylinder 0
     mov $0, %dh             // head 0
     mov $KERNEL_OFFSET, %bx // bx -> destination
     mov boot_drive, %dl     // dl -> disk
+    mov $1, %al
+
+1:
+    mov $2, %ah             // read mode
     int $0x13
-    // no error checking, let's hope it works
+    test %ah, %ah
+    jnz fail
+    add $SECTOR_SIZE, %bx
+    inc %cl
+    dec %si
+    jnz 1b
     ret
 
+fail:
+    mov $read_error, %si
+    call print_string
+    hlt
+    jmp .
 
 switch_to_32bit:
     mov	$2, %al
@@ -111,6 +134,8 @@ boot_drive:
     .byte 0
 banner:
     .asciz "YABLOKO bootloader started\r\n"
+read_error:
+    .asciz "Read error\r\n"
 
     .balign 2
 entry:

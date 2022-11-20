@@ -5,6 +5,14 @@ CC=x86_64-elf-gcc
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$<
 
+debug-preboot: image.bin mbr.elf
+	qemu-system-i386 -drive format=raw,file=$< -s -S &
+	x86_64-elf-gdb mbr.elf \
+		-ex "set architecture i8086" \
+		-ex "target remote localhost:1234" \
+		-ex "break *0x7c00" \
+		-ex "continue"
+
 debug-boot: image.bin mbr.elf
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
 	x86_64-elf-gdb mbr.elf \
@@ -41,7 +49,7 @@ mbr.elf: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.bin *.o */*.o tools/mkfs
+	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@

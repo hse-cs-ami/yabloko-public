@@ -45,7 +45,7 @@ vector\i :
 .global default_handlers
 default_handlers:
 .set i,0
-.rept 40
+.rept 256
     irq_insertX %i
     .set i, i+1
 .endr

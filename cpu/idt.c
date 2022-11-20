@@ -33,6 +33,9 @@ void set_idt_gate(int n, uint32_t handler) {
 extern uint32_t default_handlers[];
 
 void init_idt() {
+    if (default_handlers[0] == 0) {
+        panic("handler table empty\n");
+    }
     for (int i = 0; i < IDT_HANDLERS; i++) {
         set_idt_gate(i, default_handlers[i]);
     }
@@ -126,11 +129,12 @@ static idt_register_t idt_reg;
 
 void load_idt() {
     init_idt();
-    init_pic();
 
     idt_reg.base = &idt;
     idt_reg.limit = sizeof(idt) - 1;
-    asm("lidt %0" : : "m"(idt_reg));
+    asm("lidt (%0)" : : "r"(&idt_reg));
+
+    init_pic();
 }
 
 void cli() {
