@@ -6,9 +6,11 @@ asm(".asciz \"kernel start\"");
 #include "drivers/vga.h"
 #include "drivers/ata.h"
 #include "drivers/misc.h"
+#include "drivers/uart.h"
 
 void _start() {
     init_keyboard();
+    uartinit();
     load_idt();
     sti();
     char buf[512];
@@ -20,8 +22,7 @@ void _start() {
     printk(buf);
 
     while (1) {
-        asm("pause");
+        asm("hlt");
     }
-    asm("hlt");
     qemu_shutdown();
 }

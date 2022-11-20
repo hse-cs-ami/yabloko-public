@@ -79,8 +79,7 @@ void trap(registers_t *r) {
         if (r->int_no < ARRLEN(exception_messages)) {
             msg = exception_messages[r->int_no];
         }
-        printk(msg);
-        printk("\n");
+        panic(msg);
     }
 
     /* Handle the interrupt in a more modular way */

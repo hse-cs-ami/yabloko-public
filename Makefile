@@ -3,7 +3,7 @@ LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
 
 run: image.bin
-	qemu-system-i386 -drive format=raw,file=$<
+	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
 
 debug-preboot: image.bin mbr.elf
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
@@ -33,7 +33,8 @@ fs.img: kernel.bin tools/mkfs
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o string.o drivers/ata.o cpu/vectors.o cpu/idt.o
+kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
+	string.o drivers/ata.o cpu/vectors.o cpu/idt.o drivers/uart.o
 	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
