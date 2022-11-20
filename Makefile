@@ -25,7 +25,7 @@ fs.img: kernel.bin tools/mkfs
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o vga.o string.o drivers/ata.o
+kernel.bin: kernel.o drivers/vga.o string.o drivers/ata.o
 	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
@@ -41,7 +41,7 @@ mbr.elf: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.bin *.o tools/mkfs
+	rm -f *.elf *.bin *.o tools/mkfs
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@

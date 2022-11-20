@@ -1,6 +1,6 @@
 asm(".asciz \"kernel start\"");
 
-#include "vga.h"
+#include "drivers/vga.h"
 #include "drivers/ata.h"
 #include "drivers/misc.h"
 
