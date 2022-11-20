@@ -1,10 +1,13 @@
 asm(".asciz \"kernel start\"");
 
+#include "cpu/isr.h"
 #include "drivers/vga.h"
 #include "drivers/ata.h"
 #include "drivers/misc.h"
 
 void _start() {
+    load_idt();
+    sti();
     char buf[512];
 
     vga_clear_screen();
