@@ -13,6 +13,9 @@ _start:
 
 .equ ELF32_ENTRY_OFFSET, 0x18
 .equ ELF32_PHDR_OFFSET, 0x1c
+.equ ELF32_PHENTSIZE_OFFSET, ELF32_PHDR_OFFSET + 14
+.equ ELF32_PHNUM_OFFSET, ELF32_PHENTSIZE_OFFSET + 2
+.equ ELF32_PHDR_P_OFFSET, 4
 .equ ELF32_PHDR_FILESZ_OFFSET, 4*4
 .equ KERNEL_OFFSET, 0x1000
 
@@ -31,8 +34,15 @@ load_kernel:
     mov KERNEL_OFFSET + ELF32_ENTRY_OFFSET, %si
     mov %si, entry // store entry point
 
-    mov KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
+    mov KERNEL_OFFSET + ELF32_PHNUM_OFFSET, %ax
+    dec %ax  // no offset to the first entry
+    mulb KERNEL_OFFSET + ELF32_PHENTSIZE_OFFSET
+    mov %ax, %di
+
+    add KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
+    // now di holds offset to the last phentry
     mov KERNEL_OFFSET + ELF32_PHDR_FILESZ_OFFSET(%di), %ax
+    add KERNEL_OFFSET + ELF32_PHDR_P_OFFSET(%di), %ax
     sub $0x1000, %ax // we won't load the header
     add $SECTOR_SIZE - 1, %ax
     shr $SECTOR_SHIFT, %ax // round up to sector count

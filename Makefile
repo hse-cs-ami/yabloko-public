@@ -25,11 +25,11 @@ fs.img: kernel.bin tools/mkfs
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o console.o drivers/vga.o string.o drivers/ata.o cpu/vectors.o cpu/idt.o
+kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o string.o drivers/ata.o cpu/vectors.o cpu/idt.o
 	$(LD) -m elf_i386 -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
-	$(CC) -m32 -ffreestanding -c -g $< -o $@
+	$(CC) -m32 -ffreestanding -Wall -Werror -c -g $< -o $@
 
 %.o: %.S
 	$(AS) --32 -g $^ -o $@

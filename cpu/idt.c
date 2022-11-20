@@ -30,7 +30,7 @@ void set_idt_gate(int n, uint32_t handler) {
 }
 
 // defined in vectors.S
-extern uint32_t default_handlers[IDT_HANDLERS];
+extern uint32_t default_handlers[];
 
 void init_idt() {
     for (int i = 0; i < IDT_HANDLERS; i++) {
@@ -64,7 +64,11 @@ const char *exception_messages[] = {
 
 #define ARRLEN(a) (sizeof(a) / sizeof(a[0]))
 
-isr_t interrupt_handlers[IDT_HANDLERS];
+static isr_t interrupt_handlers[IDT_HANDLERS];
+
+void register_interrupt_handler(uint8_t i, isr_t handler) {
+    interrupt_handlers[i] = handler;
+}
 
 void trap(registers_t *r) {
     if (r->int_no < 32) {
