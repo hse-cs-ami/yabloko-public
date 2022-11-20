@@ -1,0 +1,6 @@
+*.o
+*.img
+*.bin
+*.elf
+*.dSYM
+tools/mkfs
