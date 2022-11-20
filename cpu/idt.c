@@ -30,7 +30,7 @@ void set_idt_gate(int n, uint32_t handler) {
 }
 
 // defined in vectors.S
-extern uint32_t default_handlers[];
+extern const uint32_t default_handlers[];
 
 void init_idt() {
     if (default_handlers[0] == 0) {
@@ -41,7 +41,7 @@ void init_idt() {
     }
 }
 
-const char *exception_messages[] = {
+const char * const exception_messages[] = {
     "Division By Zero",
     "Debug",
     "Non Maskable Interrupt",

@@ -16,7 +16,11 @@ get_drive_geometry:
     mov $8, %ah
     mov boot_drive, %dl
     int $0x13
-    // TODO
+    inc %dh  // number of heads
+    mov %dh, disk_heads
+    and 0x3f, %cl
+    mov %cl, sectors_per_track
+    ret
 
 
 .equ ELF32_ENTRY_OFFSET, 0x18
@@ -42,13 +46,17 @@ load_kernel:
     mov KERNEL_OFFSET + ELF32_ENTRY_OFFSET, %si
     mov %si, entry // store entry point
 
+    #if 0
     mov KERNEL_OFFSET + ELF32_PHNUM_OFFSET, %ax
     dec %ax  // no offset to the first entry
     mulb KERNEL_OFFSET + ELF32_PHENTSIZE_OFFSET
     mov %ax, %di
-
     add KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
     // now di holds offset to the last phentry
+    #else
+    mov KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
+    // now di holds offset to the first phentry
+    #endif
     mov KERNEL_OFFSET + ELF32_PHDR_FILESZ_OFFSET(%di), %ax
     add KERNEL_OFFSET + ELF32_PHDR_P_OFFSET(%di), %ax
     sub $0x1000, %ax // we won't load the header
@@ -140,6 +148,10 @@ read_error:
     .balign 2
 entry:
     .word 0
+disk_heads:
+    .byte 0
+sectors_per_track:
+    .byte 0
 
     .balign 4
 gdt_start:

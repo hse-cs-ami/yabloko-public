@@ -37,11 +37,11 @@ vector\i :
     .section .text
     handler \number
 
-    .section .data
+    .section .rodata
     .long vector\number
 .endm
 
-.section .data
+.section .rodata
 .global default_handlers
 default_handlers:
 .set i,0
