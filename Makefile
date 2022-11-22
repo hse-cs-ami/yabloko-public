@@ -46,7 +46,7 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 	$(CC) -m32 -ffreestanding -Wall -Werror -c -g $< -o $@
 
 %.o: %.S
-	$(AS) --32 -g $^ -o $@
+	$(CC) -m32 -ffreestanding -c -g $^ -o $@
 
 mbr.bin: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@

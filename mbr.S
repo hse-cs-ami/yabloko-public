@@ -1,3 +1,5 @@
+#include "cpu/gdt.h"
+
     .code16
     .global _start
 _start:
@@ -102,12 +104,12 @@ switch_to_32bit:
     mov %cr0, %eax
     or $1, %eax             // 3. enable protected mode
     mov %eax, %cr0
-    ljmp $CODE_SEG, $init_32bit // 4. far jump
+    ljmp $SEG_KCODE << 3, $init_32bit // 4. far jump
 
 
 .code32
 init_32bit:
-    mov $DATA_SEG, %ax      // 5. update segment registers
+    mov $SEG_KDATA << 3, %ax      // 5. update segment registers
     mov %ax, %ds
     mov %ax, %ss
     mov %ax, %es
@@ -155,34 +157,14 @@ sectors_per_track:
     .balign 4
 gdt_start:
     .quad 0x0 // null descriptor
-
-// code segment descriptor
-gdt_code:
-    .word 0xffff    // segment length, bits 0-15
-    .word 0x0       // segment base, bits 0-15
-    .byte 0x0       // segment base, bits 16-23
-    .byte 0b10011010 // flags (8 bits)
-    .byte 0b11001111 // flags (4 bits) + segment length, bits 16-19
-    .byte 0x0       // segment base, bits 24-31
-
-// data segment descriptor
-gdt_data:
-    .word 0xffff    // segment length, bits 0-15
-    .word 0x0       // segment base, bits 0-15
-    .byte 0x0       // segment base, bits 16-23
-    .byte 0b10010010 // flags (8 bits)
-    .byte 0b11001111 // flags (4 bits) + segment length, bits 16-19
-    .byte 0x0       // segment base, bits 24-31
-
+    SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg
+    SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
 gdt_end:
 
 // GDT descriptor
 gdt_descriptor:
     .word gdt_end - gdt_start - 1 // size (16 bit)
     .int  gdt_start               // address (32 bit)
-
-.equ CODE_SEG, gdt_code - gdt_start
-.equ DATA_SEG, gdt_data - gdt_start
 
     . = _start + 510     # pad to 510 bytes
     .byte 0x55, 0xaa     # boot sector magic value

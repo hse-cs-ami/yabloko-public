@@ -12,6 +12,11 @@
 #define SEG_UDATA 4
 #define SEG_TSS   5
 
+#define SEG_ASM(type,base,lim)                                  \
+        .word (((lim) >> 12) & 0xffff), ((base) & 0xffff);      \
+        .byte (((base) >> 16) & 0xff), (0x90 | (type)),         \
+                (0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
+
 #define USER_BASE 0x400000 // 4 MB
 
 #ifndef __ASSEMBLER__
