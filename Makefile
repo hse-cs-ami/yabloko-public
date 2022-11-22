@@ -39,7 +39,7 @@ image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
-	string.o drivers/ata.o cpu/vectors.o cpu/idt.o drivers/uart.o
+	string.o drivers/ata.o cpu/vectors.o cpu/idt.o cpu/gdt.o drivers/uart.o
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c

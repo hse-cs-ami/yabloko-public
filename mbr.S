@@ -80,8 +80,7 @@ bios_disk_read:
 1:
     mov $2, %ah             // read mode
     int $0x13
-    test %ah, %ah
-    jnz fail
+    jc fail
     add $SECTOR_SIZE, %bx
     inc %cl
     dec %si

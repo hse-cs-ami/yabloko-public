@@ -2,6 +2,7 @@ asm(".asciz \"kernel start\"");
 
 #include "console.h"
 #include "cpu/isr.h"
+#include "cpu/gdt.h"
 #include "drivers/keyboard.h"
 #include "drivers/vga.h"
 #include "drivers/ata.h"
@@ -9,6 +10,7 @@ asm(".asciz \"kernel start\"");
 #include "drivers/uart.h"
 
 void _start() {
+    load_gdt();
     init_keyboard();
     uartinit();
     load_idt();
