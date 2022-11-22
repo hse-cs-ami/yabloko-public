@@ -116,7 +116,7 @@ init_32bit:
     mov %ax, %fs
     mov %ax, %gs
 
-    mov $0x90000, %ebp      // 6. setup stack
+    mov $KERN_STACK_BASE, %ebp      // 6. setup stack
     mov %ebp, %esp
 
     movzwl entry, %esi

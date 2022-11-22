@@ -4,6 +4,11 @@
 #define STA_W     0x2       // Writeable (non-executable segments)
 #define STA_R     0x2       // Readable (executable segments)
 
+// System segment type bits
+#define STS_T32A    0x9     // Available 32-bit TSS
+#define STS_IG32    0xE     // 32-bit Interrupt Gate
+#define STS_TG32    0xF     // 32-bit Trap Gate
+
 #define DPL_USER 3
 
 #define SEG_KCODE 1
@@ -18,6 +23,7 @@
                 (0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
 
 #define USER_BASE 0x400000 // 4 MB
+#define KERN_STACK_BASE 0x90000
 
 #ifndef __ASSEMBLER__
 void load_gdt();
