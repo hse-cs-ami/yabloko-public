@@ -1,6 +1,8 @@
+ifeq ($(shell uname -s),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
+endif
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio

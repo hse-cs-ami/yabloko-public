@@ -60,7 +60,8 @@ int main(int argc, char* argv[]) {
         }
 
         dirent->reserved = 0;
-        strlcpy(dirent->name, basename(name), sizeof(dirent->name));
+        dirent->name[sizeof(dirent->name) - 1] = '\0';
+        strncpy(dirent->name, basename(name), sizeof(dirent->name) - 1);
     }
 
     fseek(image, 0, SEEK_SET);
