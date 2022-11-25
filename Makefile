@@ -7,6 +7,10 @@ CC=x86_64-elf-gcc
 GDB=x86_64-elf-gdb
 endif
 
+CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
+		 -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
+CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
 
@@ -48,7 +52,7 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
-	$(CC) -m32 -ffreestanding -Wall -Werror -c -g $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.S
 	$(CC) -m32 -ffreestanding -c -g $^ -o $@
