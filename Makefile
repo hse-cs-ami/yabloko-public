@@ -8,7 +8,7 @@ GDB=x86_64-elf-gdb
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
-		 -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
+		 -Os -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 
 run: image.bin

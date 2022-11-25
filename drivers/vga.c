@@ -1,7 +1,7 @@
 #include "port.h"
 #include "../string.h"
 
-char* const video_memory = (char*) 0xb8000;
+static char* const video_memory = (char*) 0xb8000;
 
 enum colors16 {
     black = 0,

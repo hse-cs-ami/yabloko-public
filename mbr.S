@@ -30,8 +30,11 @@ get_drive_geometry:
 .equ ELF32_PHENTSIZE_OFFSET, ELF32_PHDR_OFFSET + 14
 .equ ELF32_PHNUM_OFFSET, ELF32_PHENTSIZE_OFFSET + 2
 .equ ELF32_PHDR_P_OFFSET, 4
+.equ ELF32_PHDR_PTYPE_OFFSET, 0
 .equ ELF32_PHDR_FILESZ_OFFSET, 4*4
 .equ KERNEL_OFFSET, 0x1000
+
+.equ PT_LOAD, 1
 
 .equ MBR_SECTORS, 2
 .equ SECTOR_BASE, 1
@@ -48,18 +51,23 @@ load_kernel:
     mov KERNEL_OFFSET + ELF32_ENTRY_OFFSET, %si
     mov %si, entry // store entry point
 
-    #if 0
-    mov KERNEL_OFFSET + ELF32_PHNUM_OFFSET, %ax
-    dec %ax  // no offset to the first entry
+    mov KERNEL_OFFSET + ELF32_PHNUM_OFFSET, %si
+read_segment:
+    dec %si  // no offset to the first entry
+    mov %si, %ax
     mulb KERNEL_OFFSET + ELF32_PHENTSIZE_OFFSET
     mov %ax, %di
     add KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
-    // now di holds offset to the last phentry
-    #else
-    mov KERNEL_OFFSET + ELF32_PHDR_OFFSET, %di
-    // now di holds offset to the first phentry
-    #endif
+    // now di holds offset to the phentry
+    mov KERNEL_OFFSET + ELF32_PHDR_PTYPE_OFFSET(%di), %ax
+    cmp $PT_LOAD, %ax
+    jnz read_segment // not a PT_LOAD segment
     mov KERNEL_OFFSET + ELF32_PHDR_FILESZ_OFFSET(%di), %ax
+    test %ax, %ax
+    jz read_segment // empty segment
+
+    // now di holds offset to the last phentry loaded from file, ax its filesz
+
     add KERNEL_OFFSET + ELF32_PHDR_P_OFFSET(%di), %ax
     sub $0x1000, %ax // we won't load the header
     add $SECTOR_SIZE - 1, %ax
