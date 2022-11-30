@@ -17,7 +17,7 @@ run: image.bin
 run-nox: image.bin
 	qemu-system-i386 -nographic -drive format=raw,file=$< -serial mon:stdio
 
-debug-preboot-nox: image.bin mbr.elf
+debug-boot-nox: image.bin mbr.elf
 	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S &
 	$(GDB) mbr.elf \
 		-ex "set architecture i8086" \
@@ -28,8 +28,9 @@ debug-preboot-nox: image.bin mbr.elf
 debug-boot: image.bin mbr.elf
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
 	$(GDB) mbr.elf \
+		-ex "set architecture i8086" \
 		-ex "target remote localhost:1234" \
-		-ex "break init_32bit" \
+		-ex "break *0x7c00" \
 		-ex "continue"
 
 debug: image.bin
