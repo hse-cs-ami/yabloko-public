@@ -8,11 +8,14 @@ GDB=x86_64-elf-gdb
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
-		 -Os -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
+		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
+
+run-nox: image.bin
+	qemu-system-i386 -nographic -drive format=raw,file=$< -serial mon:stdio
 
 debug-preboot-nox: image.bin mbr.elf
 	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S &
@@ -31,6 +34,13 @@ debug-boot: image.bin mbr.elf
 
 debug: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
+	$(GDB) kernel.bin \
+		-ex "target remote localhost:1234" \
+		-ex "break _start" \
+		-ex "continue"
+
+debug-nox: image.bin
+	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S &
 	$(GDB) kernel.bin \
 		-ex "target remote localhost:1234" \
 		-ex "break _start" \
@@ -64,7 +74,7 @@ mbr.elf: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs
+	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs user/false
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@
