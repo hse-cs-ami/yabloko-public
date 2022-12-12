@@ -9,6 +9,7 @@ asm(".asciz \"kernel start\"");
 #include "drivers/misc.h"
 #include "drivers/uart.h"
 #include "fs/fs.h"
+#include "string.h"
 
 void _start() {
     load_gdt();
@@ -16,19 +17,28 @@ void _start() {
     uartinit();
     load_idt();
     sti();
-    char buf[4096 + 512];
+
+    char *buf = (char*)(16 << 20);
 
     vga_clear_screen();
     printk("YABLOKO\n");
 
-    if (read_file("kernel.bin", buf, sizeof(buf)) == 0) {
+    if (read_file("kernel.bin", buf, 4096 + sector_size) > 0) {
         printk(buf + 4096);
     } else {
         printk("failed to read file\n");
     }
+    printk("\n> ");
 
     while (1) {
+        if (kbd_buf_size > 0 && kbd_buf[kbd_buf_size-1] == '\n') {
+            if (!strncmp("halt\n", kbd_buf, kbd_buf_size)) {
+                qemu_shutdown();
+            } else {
+                printk("unknown command, try: halt\n> ");
+            }
+            kbd_buf_size = 0;
+        }
         asm("hlt");
     }
-    qemu_shutdown();
 }

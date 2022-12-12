@@ -29,11 +29,15 @@ int read_file(const char* name, void* buf, uint32_t bufsize) {
         return -1;
     }
     uint32_t sector = fs_start + statbuf.reserved[0];
-    while (bufsize >= sector_size) {
+    uint32_t bytes_read = 0;
+    uint32_t file_sectors = (statbuf.size + sector_size - 1) / sector_size;
+    while (bufsize >= sector_size && file_sectors > 0) {
         read_sectors_ATA_PIO(buf, sector, 1);
         sector++;
+        file_sectors--;
         bufsize -= sector_size;
         buf += sector_size;
+        bytes_read += sector_size;
     }
-    return 0;
+    return bytes_read < statbuf.size ? bytes_read : statbuf.size;
 }
