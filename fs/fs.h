@@ -21,6 +21,7 @@ size is in bytes, name is 0-terminated.
 
 enum {
 	sector_size = 512,
+	ents_in_dir = 15,
 };
 
 struct dirent {
@@ -32,7 +33,7 @@ struct dirent {
 
 struct dir {
 	char reserved[32];
-	struct dirent entries[15];
+	struct dirent entries[ents_in_dir];
 };
 
 struct stat {

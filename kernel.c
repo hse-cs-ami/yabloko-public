@@ -8,6 +8,7 @@ asm(".asciz \"kernel start\"");
 #include "drivers/ata.h"
 #include "drivers/misc.h"
 #include "drivers/uart.h"
+#include "fs/fs.h"
 
 void _start() {
     load_gdt();
@@ -15,13 +16,16 @@ void _start() {
     uartinit();
     load_idt();
     sti();
-    char buf[512];
+    char buf[4096 + 512];
 
     vga_clear_screen();
     printk("YABLOKO\n");
 
-    read_sectors_ATA_PIO((uint32_t)buf, 10, 1);
-    printk(buf);
+    if (read_file("kernel.bin", buf, sizeof(buf)) == 0) {
+        printk(buf + 4096);
+    } else {
+        printk("failed to read file\n");
+    }
 
     while (1) {
         asm("hlt");
