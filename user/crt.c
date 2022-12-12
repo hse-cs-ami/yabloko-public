@@ -1,6 +1,9 @@
 int main();
 
+void _exit(int exit_status) {
+    asm("int $0x84": : "a"(0), "b"(exit_status));
+}
+
 void _start() {
-    int exit_status = main();
-    asm("int $0x84": :"a"(exit_status));
+    _exit(main());
 }
