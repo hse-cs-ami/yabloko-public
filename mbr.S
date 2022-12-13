@@ -150,9 +150,9 @@ done:
 boot_drive:
     .byte 0
 banner:
-    .asciz "YABLOKO bootloader started\r\n"
+    .asciz "YABLOKO bootloader started\n\r"
 read_error:
-    .asciz "Read error\r\n"
+    .asciz "Read error\n\r"
 
     .balign 2
 entry:

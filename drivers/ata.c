@@ -19,7 +19,7 @@
 static void ATA_wait_BSY();
 static void ATA_wait_RDY();
 
-void read_sectors_ATA_PIO(uint32_t target_address, uint32_t LBA, uint8_t sector_count)
+void read_sectors_ATA_PIO(void* target_address, uint32_t LBA, uint8_t sector_count)
 {
     ATA_wait_BSY();
     port_byte_out(0x1F6, 0xE0 | ((LBA >> 24) & 0xF));
