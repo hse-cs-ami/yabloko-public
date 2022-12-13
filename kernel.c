@@ -1,4 +1,4 @@
-asm(".asciz \"kernel start\"");
+asm(".asciz \"kernel start\\n\"");
 
 #include "console.h"
 #include "cpu/isr.h"
@@ -9,7 +9,7 @@ asm(".asciz \"kernel start\"");
 #include "drivers/misc.h"
 #include "drivers/uart.h"
 #include "fs/fs.h"
-#include "string.h"
+#include "lib/string.h"
 
 void _start() {
     load_gdt();
@@ -34,6 +34,10 @@ void _start() {
         if (kbd_buf_size > 0 && kbd_buf[kbd_buf_size-1] == '\n') {
             if (!strncmp("halt\n", kbd_buf, kbd_buf_size)) {
                 qemu_shutdown();
+            } else if (!strncmp("run ", kbd_buf, kbd_buf_size)) {
+                kbd_buf[kbd_buf_size-1] = '\0';
+                // const char* cmd = kbd_buf + 4;
+                // run_elf(cmd);
             } else {
                 printk("unknown command, try: halt\n> ");
             }

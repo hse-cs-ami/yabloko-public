@@ -1,5 +1,5 @@
 #include "port.h"
-#include "../string.h"
+#include "../lib/string.h"
 
 static char* const video_memory = (char*) 0xb8000;
 

@@ -1,5 +1,5 @@
 #include "fs.h"
-#include "../string.h"
+#include "../lib/string.h"
 #include "../drivers/ata.h"
 
 enum {
