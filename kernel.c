@@ -30,6 +30,7 @@ void _start() {
     } else {
         printk("failed to read file\n");
     }
+    printk("\n> ");
     while (1) {
         if (kbd_buf_size > 0 && kbd_buf[kbd_buf_size-1] == '\n') {
             if (!strncmp("halt\n", kbd_buf, kbd_buf_size)) {
@@ -39,7 +40,7 @@ void _start() {
                 const char* cmd = kbd_buf + 4;
                 run_elf(cmd);
             } else {
-                printk("unknown command, try: halt");
+                printk("unknown command, try: halt | run CMD");
             }
             kbd_buf_size = 0;
             printk("\n> ");
