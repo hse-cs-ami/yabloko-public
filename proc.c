@@ -17,12 +17,18 @@ struct kstack {
     uint32_t space[400];
     struct context context;
     registers_t trapframe;
+    char bottom[];
+};
+
+struct task {
+    struct taskstate tss;
+    struct kstack stack;
 };
 
 struct vm {
     void *kernel_thread;
     void *user_thread;
-    struct kstack *user_kstack;
+    struct task *user_task;
 } *vm;
 
 void trapret();
@@ -31,7 +37,8 @@ void swtch(void** oldstack, void* newstack);
 void run_elf(const char* name) {
     if (!vm) {
         vm = kmalloc(sizeof(struct vm));
-        vm->user_kstack = kmalloc(sizeof(struct kstack));
+        vm->user_task = kmalloc(sizeof(struct task));
+        switchuvm(&vm->user_task->tss, vm->user_task->stack.bottom);
     }
     if (read_file(name, (void*)USER_BASE, 100 << 20) <= 0) {
         printk(name);
@@ -40,7 +47,7 @@ void run_elf(const char* name) {
     }
     Elf32_Ehdr *hdr = (void*)USER_BASE;
 
-    struct kstack *u = vm->user_kstack;
+    struct kstack *u = &vm->user_task->stack;
     memset(u, 0, sizeof(*u));
     u->context.eip = (uint32_t)trapret;
 
