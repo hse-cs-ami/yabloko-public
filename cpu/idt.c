@@ -1,4 +1,5 @@
 #include "isr.h"
+#include "gdt.h"
 #include "../drivers/port.h"
 #include "../console.h"
 
@@ -10,7 +11,10 @@ typedef struct {
     uint16_t low_offset;
     uint16_t selector;
     uint8_t always0;
-    uint8_t flags;
+    uint8_t type: 4;
+    uint8_t s: 1;
+    uint8_t dpl: 2;
+    uint8_t p: 1;
     uint16_t high_offset;
 } __attribute__((packed)) idt_gate_t;
 
@@ -19,13 +23,17 @@ idt_gate_t idt[IDT_HANDLERS];
 #define low_16(address) (uint16_t)((address) & 0xFFFF)
 #define high_16(address) (uint16_t)(((address) >> 16) & 0xFFFF)
 
-void set_idt_gate(int n, uint32_t handler) {
+#define STS_IG32    0xE     // 32-bit Interrupt Gate
+#define STS_TG32    0xF     // 32-bit Trap Gate
+
+void set_idt_gate(int n, _Bool istrap, uint32_t handler, uint8_t dpl) {
     idt[n].low_offset = low_16(handler);
     idt[n].selector = 0x08; // see GDT
     idt[n].always0 = 0;
-    // 0x8E = 1  00 0 1  110
-    //        P DPL 0 D Type
-    idt[n].flags = 0x8E;
+    idt[n].type = istrap ? STS_TG32 : STS_IG32;
+    idt[n].s = 0;
+    idt[n].dpl = dpl;
+    idt[n].p = 1;
     idt[n].high_offset = high_16(handler);
 }
 
@@ -37,8 +45,9 @@ void init_idt() {
         panic("handler table empty\n");
     }
     for (int i = 0; i < IDT_HANDLERS; i++) {
-        set_idt_gate(i, default_handlers[i]);
+        set_idt_gate(i, 0, default_handlers[i], 0);
     }
+    set_idt_gate(T_SYSCALL, 1, default_handlers[T_SYSCALL], DPL_USER);
 }
 
 const char * const exception_messages[] = {
