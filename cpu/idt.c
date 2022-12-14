@@ -1,5 +1,7 @@
 #include "isr.h"
 #include "gdt.h"
+#include "../syscall.h"
+#include "../proc.h"
 #include "../drivers/port.h"
 #include "../console.h"
 
@@ -83,6 +85,26 @@ void register_interrupt_handler(uint8_t i, isr_t handler) {
 }
 
 void trap(registers_t *r) {
+    if (r->int_no == T_SYSCALL) {
+        switch (r->eax) {
+            case SYS_exit:
+                if (r->ebx == 0) {
+                    printk("* success\n");
+                } else {
+                    printk("* failure\n");
+                }
+                killproc();
+            case SYS_greet:
+                printk("Hello world!\n");
+                r->eax = 0;
+                break;
+            default:
+                printk("Unknown syscall\n");
+                r->eax = -1;
+        }
+        return;
+    }
+
     if (r->int_no < 32) {
         const char* msg = "Reserved";
         if (r->int_no < ARRLEN(exception_messages)) {

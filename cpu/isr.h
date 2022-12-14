@@ -18,7 +18,6 @@ enum {
     IRQ13,
     IRQ14,
     IRQ15,
-    T_SYSCALL = 0x84,
 };
 
 /* Struct which aggregates many registers.

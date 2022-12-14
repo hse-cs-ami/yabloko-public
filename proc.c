@@ -67,3 +67,9 @@ void run_elf(const char* name) {
 
     // process has finished
 }
+
+_Noreturn void killproc() {
+    void* task_stack;
+    swtch(&task_stack, vm->kernel_thread);
+    __builtin_unreachable();
+}

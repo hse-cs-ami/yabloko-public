@@ -47,8 +47,8 @@ debug-nox: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: kernel.bin tools/mkfs user/false
-	tools/mkfs $@ $< user/false
+fs.img: kernel.bin tools/mkfs user/false user/greet
+	tools/mkfs $@ $< user/false user/greet
 
 LDFLAGS=-m elf_i386
 

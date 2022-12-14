@@ -8,8 +8,8 @@ alltraps:
     pushl %gs
     pushal
 
-    //mov $10, %ax
-    //mov %ax, %ds
+    mov $0x10, %ax
+    mov %ax, %ds
     
     # Call trap(tf), where tf=%esp
     pushl %esp
