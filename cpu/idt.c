@@ -42,27 +42,27 @@ void init_idt() {
 }
 
 const char * const exception_messages[] = {
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
+    [0] = "Division By Zero",
+    [1] = "Debug",
+    [2] = "Non Maskable Interrupt",
+    [3] = "Breakpoint",
+    [4] = "Into Detected Overflow",
+    [5] = "Out of Bounds",
+    [6] = "Invalid Opcode",
+    [7] = "No Coprocessor",
 
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
+    [8] = "Double Fault",
+    [9] = "Coprocessor Segment Overrun",
+    [10] = "Bad TSS",
+    [11] = "Segment Not Present",
+    [12] = "Stack Fault",
+    [13] = "General Protection Fault",
+    [14] = "Page Fault",
+    [15] = "Unknown Interrupt",
 
-    "Coprocessor Fault",
-    "Alignment Check",
-    "Machine Check",
+    [16] = "Coprocessor Fault",
+    [17] = "Alignment Check",
+    [18] = "Machine Check",
 };
 
 #define ARRLEN(a) (sizeof(a) / sizeof(a[0]))

@@ -26,3 +26,10 @@ int strncmp(const char* s1, const char* s2, size_t size) {
     }
     return (unsigned char)(*s1) - (unsigned char)(*s2);
 }
+
+void memset(void* b, char c, size_t len) {
+    char* p = b;
+    for (size_t i = 0; i < len; ++i) {
+        p[i] = c;
+    }
+}

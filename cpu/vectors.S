@@ -1,3 +1,5 @@
+    .global trapret
+
 alltraps:
     # Build trap frame.
     pushl %ds
@@ -13,7 +15,9 @@ alltraps:
     pushl %esp
     call trap
     add $4, %esp
+    // execution falls through to trapret
 
+trapret:
     popal
     popl %gs
     popl %fs

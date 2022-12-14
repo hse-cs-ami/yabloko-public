@@ -48,19 +48,19 @@ debug-nox: image.bin
 		-ex "continue"
 
 fs.img: kernel.bin tools/mkfs user/false
-	tools/mkfs $@ $<
+	tools/mkfs $@ $< user/false
 
 LDFLAGS=-m elf_i386
 
 user/%: user/%.o user/crt.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x101000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 	drivers/ata.o cpu/vectors.o cpu/idt.o cpu/gdt.o drivers/uart.o \
-	fs/fs.o lib/mem.o lib/string.o
+	fs/fs.o lib/mem.o lib/string.o proc.o cpu/swtch.o
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
