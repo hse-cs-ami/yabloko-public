@@ -1,6 +1,8 @@
 #include "port.h"
 #include "vga.h"
 
+char* const video_memory = (char*) 0xb8000;
+
 static unsigned char get_color(unsigned char fg, unsigned char bg) {
     return (bg << 4) + fg;
 }

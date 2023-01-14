@@ -1,6 +1,6 @@
 #pragma once
 
-static char* const video_memory = (char*) 0xb8000;
+extern char* const video_memory;
 
 enum {
     ROWS = 25,
