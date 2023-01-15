@@ -18,7 +18,11 @@ run-nox: image.bin
 	qemu-system-i386 -nographic -drive format=raw,file=$< -serial mon:stdio
 
 ejudge.sh: image.bin
-	echo >$@ "#!/bin/sh\nexec qemu-system-i386 -nographic -drive format=raw,file=$< -serial mon:stdio"
+	echo >$@ "#!/bin/sh"
+	echo >>$@ "base64 -d <<===EOF | gunzip >image.bin"
+	gzip <$^ | base64 >>$@
+	echo >>$@ "===EOF"
+	echo >>$@ "exec qemu-system-i386 -nographic -drive format=raw,file=image.bin -serial mon:stdio"
 	chmod +x $@
 
 debug-boot-nox: image.bin mbr.elf
