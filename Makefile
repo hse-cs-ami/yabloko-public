@@ -82,7 +82,7 @@ mbr.elf: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs
+	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs ejudge.sh
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@
