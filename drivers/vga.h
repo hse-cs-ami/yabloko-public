@@ -34,5 +34,6 @@ enum colors16 {
 void vga_clear_screen();
 
 void vga_set_char(unsigned offset, char c);
+unsigned vga_get_cursor();
 void vga_print_string(const char* s);
 void vga_print_string_noscroll(const char* s);

@@ -66,7 +66,7 @@ user/%: user/%.o user/crt.o
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o
+kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o submission.o
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
