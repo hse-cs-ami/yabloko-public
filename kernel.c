@@ -55,7 +55,7 @@ void _start() {
     vga_print_times("$", 77);
     dump_screen();
 
-    vga_print_times("\n", 24);
+    vga_print_times("\n", 23);
     dump_screen();
 
     qemu_shutdown();
