@@ -10,6 +10,16 @@ endif
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+ASMFLAGS = -m32 -ffreestanding -c -g
+
+ifeq ($(LLVM),on)
+#AS=llvm-as
+LD=ld.lld
+CC=clang
+CFLAGS += -target elf-i386
+ASMFLAGS = -target elf-i386 -ffreestanding -c -g
+LDKERNELFLAGS = --script=script.ld
+endif
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -41,6 +51,12 @@ debug-boot: image.bin mbr.elf
 		-ex "break *0x7c00" \
 		-ex "continue"
 
+debug-server: image.bin
+	qemu-system-i386 -drive format=raw,file=$< -s -S
+
+debug-server-nox: image.bin
+	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S
+
 debug: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
 	$(GDB) kernel.bin \
@@ -68,13 +84,13 @@ image.bin: mbr.bin fs.img
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
 	cpu/idt.o cpu/vectors.o lib/mem.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.S
-	$(CC) -m32 -ffreestanding -c -g $^ -o $@
+	$(CC) $(ASMFLAGS) $^ -o $@
 
 mbr.bin: mbr.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
