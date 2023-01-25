@@ -76,7 +76,7 @@ image.bin: mbr.bin fs.img
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 	drivers/ata.o cpu/vectors.o cpu/idt.o cpu/gdt.o drivers/uart.o \
-	fs/fs.o lib/mem.o lib/string.o proc.o cpu/swtch.o
+	fs/fs.o lib/mem.o lib/string.o proc.o cpu/swtch.o drivers/pit.o
 	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x1000 $^
 
 %.o: %.c
