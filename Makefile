@@ -84,7 +84,10 @@ image.bin: mbr.bin fs.img
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
 	cpu/idt.o cpu/vectors.o lib/mem.o
-	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
+
+bootmain.o: bootmain.c
+	$(CC) $(CFLAGS) -Os -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -92,10 +95,14 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
 %.o: %.S
 	$(CC) $(ASMFLAGS) $^ -o $@
 
-mbr.bin: mbr.o
+mbr.bin: mbr.raw tools/mbrpad
+	cp $< $@
+	tools/mbrpad $@
+
+mbr.raw: mbr.o bootmain.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
 
-mbr.elf: mbr.o
+mbr.elf: mbr.o bootmain.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
