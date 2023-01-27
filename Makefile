@@ -67,7 +67,10 @@ image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o submission.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x9000 $^
+
+bootmain.o: bootmain.c
+	$(CC) $(CFLAGS) -Os -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -75,10 +78,14 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o submission.o
 %.o: %.S
 	$(CC) -m32 -ffreestanding -c -g $^ -o $@
 
-mbr.bin: mbr.o
+mbr.bin: mbr.raw tools/mbrpad
+	cp $< $@
+	tools/mbrpad $@
+
+mbr.raw: mbr.o bootmain.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
 
-mbr.elf: mbr.o
+mbr.elf: mbr.o bootmain.o
 	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
