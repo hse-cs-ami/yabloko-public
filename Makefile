@@ -1,10 +1,12 @@
 GDB=gdb
+OBJCOPY=objcopy
 
 ifeq ($(shell uname -s),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
 GDB=x86_64-elf-gdb
+OBJCOPY=x86_64-elf-objcopy
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
@@ -95,18 +97,18 @@ bootmain.o: bootmain.c
 %.o: %.S
 	$(CC) $(ASMFLAGS) $^ -o $@
 
-mbr.bin: mbr.raw tools/mbrpad
-	cp $< $@
+mbr.bin: mbr.elf tools/mbrpad
+	$(OBJCOPY) -S -O binary -j .text $< $@
 	tools/mbrpad $@
 
 mbr.raw: mbr.o bootmain.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
 
 mbr.elf: mbr.o bootmain.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs ejudge.sh
+	rm -f *.elf *.img *.bin *.raw *.o */*.o tools/mkfs ejudge.sh
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@
