@@ -3,7 +3,6 @@
     .code16
     .global _start
 _start:
-    mov %dl, boot_drive
     mov $banner, %si
     call print_string
 
@@ -55,20 +54,8 @@ repeat:
 done:
     ret
 
-boot_drive:
-    .byte 0
 banner:
-    .asciz "YABLOKO bootloader started\n\r"
-read_error:
-    .asciz "Read error\n\r"
-
-    .balign 2
-entry:
-    .word 0
-disk_heads:
-    .byte 0
-sectors_per_track:
-    .byte 0
+    .asciz "Loader \n"
 
     .balign 4
 gdt_start:
