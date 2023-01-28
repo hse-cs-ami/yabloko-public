@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdint.h>
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -11,8 +12,8 @@ int main(int argc, char* argv[]) {
     int fd = open(filename, O_RDWR);
     off_t length = lseek(fd, 0, SEEK_END);
     if (length > 510) {
-        fprintf(stderr, "file %s is larger than 510 bytes (size: %llu)\n",
-                filename, length);
+        fprintf(stderr, "file %s is larger than 510 bytes (size: %ju)\n",
+                filename, (uintmax_t)length);
         return 1;
     }
     lseek(fd, 510, SEEK_SET);
