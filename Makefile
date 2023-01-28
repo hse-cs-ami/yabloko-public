@@ -23,6 +23,9 @@ ASMFLAGS = -target elf-i386 -ffreestanding -c -g
 LDKERNELFLAGS = --script=script.ld
 endif
 
+OBJECTS = kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
+	cpu/idt.o cpu/vectors.o lib/mem.o
+
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
 
@@ -84,8 +87,7 @@ user/%: user/%.o user/crt.o
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
-	cpu/idt.o cpu/vectors.o lib/mem.o
+kernel.bin: $(OBJECTS)
 	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
 
 bootmain.o: bootmain.c
