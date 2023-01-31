@@ -1,10 +1,12 @@
 GDB=gdb
+OBJCOPY=objcopy
 
 ifeq ($(shell uname -s),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
 GDB=x86_64-elf-gdb
+OBJCOPY=x86_64-elf-objcopy
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
@@ -67,7 +69,10 @@ image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o submission.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x9000 $^
+
+bootmain.o: bootmain.c
+	$(CC) $(CFLAGS) -Os -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -75,14 +80,18 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/uart.o submission.o
 %.o: %.S
 	$(CC) -m32 -ffreestanding -c -g $^ -o $@
 
-mbr.bin: mbr.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
+mbr.bin: mbr.elf tools/mbrpad
+	$(OBJCOPY) -S -O binary -j .text $< $@
+	tools/mbrpad $@
 
-mbr.elf: mbr.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
+mbr.raw: mbr.o bootmain.o
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
+
+mbr.elf: mbr.o bootmain.o
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs
+	rm -f *.elf *.img *.bin *.raw *.o */*.o tools/mkfs ejudge.sh
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@

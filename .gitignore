@@ -1,0 +1,7 @@
+*.o
+*.bin
+*.img
+*.elf
+*.dSYM
+tools/mkfs
+ejudge.sh
