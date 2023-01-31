@@ -24,7 +24,8 @@ LDKERNELFLAGS = --script=script.ld
 endif
 
 OBJECTS = kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
-	cpu/idt.o cpu/vectors.o lib/mem.o
+	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o lib/mem.o proc.o lib/string.o \
+	fs/fs.o
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -76,8 +77,8 @@ debug-nox: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: kernel.bin tools/mkfs
-	tools/mkfs $@ $<
+fs.img: kernel.bin tools/mkfs user/false user/greet user/div0
+	tools/mkfs $@ $< user/false user/greet user/div0
 
 LDFLAGS=-m elf_i386
 

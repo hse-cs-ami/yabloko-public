@@ -1,5 +1,7 @@
 #include "isr.h"
 #include "gdt.h"
+#include "../syscall.h"
+#include "../proc.h"
 #include "../drivers/port.h"
 #include "../console.h"
 
@@ -47,6 +49,7 @@ void init_idt() {
     for (int i = 0; i < IDT_HANDLERS; i++) {
         set_idt_gate(i, 0, default_handlers[i], 0);
     }
+    set_idt_gate(T_SYSCALL, 1, default_handlers[T_SYSCALL], DPL_USER);
 }
 
 const char * const exception_messages[] = {
@@ -82,6 +85,26 @@ void register_interrupt_handler(uint8_t i, isr_t handler) {
 }
 
 void trap(registers_t *r) {
+    if (r->int_no == T_SYSCALL) {
+        switch (r->eax) {
+            case SYS_exit:
+                if (r->ebx == 0) {
+                    printk("* success\n");
+                } else {
+                    printk("* failure\n");
+                }
+                killproc();
+            case SYS_greet:
+                printk("Hello world!\n");
+                r->eax = 0;
+                break;
+            default:
+                printk("Unknown syscall\n");
+                r->eax = -1;
+        }
+        return;
+    }
+
     if (r->int_no < 32) {
         const char* msg = "Reserved";
         if (r->int_no < ARRLEN(exception_messages)) {
@@ -90,6 +113,7 @@ void trap(registers_t *r) {
         panic(msg);
     }
 
+    /* Handle the interrupt in a more modular way */
     if (interrupt_handlers[r->int_no] != 0) {
         isr_t handler = interrupt_handlers[r->int_no];
         handler(r);
