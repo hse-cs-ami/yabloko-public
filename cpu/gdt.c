@@ -7,7 +7,7 @@ struct seg_desc_t {
     uint16_t lim_15_0;      // Low bits of segment limit
     uint16_t base_15_0;     // Low bits of segment base address
     uint8_t base_23_16;     // Middle bits of segment base address
-    uint8_t type : 4;       // Segment type (see STS_ constants)
+    uint8_t type : 4;       // Segment type (see STA_ constants)
     uint8_t s : 1;          // 0 = system, 1 = application
     uint8_t dpl : 2;        // Descriptor Privilege Level
     uint8_t p : 1;          // Present

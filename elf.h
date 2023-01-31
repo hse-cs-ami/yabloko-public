@@ -9,8 +9,11 @@ enum {
 typedef uint32_t Elf32_Addr;
 typedef uint32_t Elf32_Off;
 
+#define ELF_MAGIC 0x464C457FU  // "\x7FELF" in little endian
+
 typedef struct {
-	unsigned char e_ident[EI_NIDENT];
+	uint32_t magic;
+	unsigned char e_ident[EI_NIDENT - 4];
 	uint16_t      e_type;
 	uint16_t      e_machine;
 	uint32_t      e_version;

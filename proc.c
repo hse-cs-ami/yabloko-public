@@ -9,8 +9,8 @@
 
 struct context {
     // matches the behavior of swtch()
-	uint32_t edi, esi, ebp, ebx;
-	uint32_t eip; // return address for swtch()
+    uint32_t edi, esi, ebp, ebx;
+    uint32_t eip; // return address for swtch()
 };
 
 struct kstack {

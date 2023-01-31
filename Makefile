@@ -1,10 +1,12 @@
 GDB=gdb
+OBJCOPY=objcopy
 
 ifeq ($(shell uname -s),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
 GDB=x86_64-elf-gdb
+OBJCOPY=x86_64-elf-objcopy
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
@@ -20,6 +22,10 @@ CFLAGS += -target elf-i386
 ASMFLAGS = -target elf-i386 -ffreestanding -c -g
 LDKERNELFLAGS = --script=script.ld
 endif
+
+OBJECTS = kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
+	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o lib/mem.o proc.o lib/string.o \
+	fs/fs.o drivers/ata.o lib/mem.o lib/string.o proc.o drivers/pit.o
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -74,10 +80,11 @@ user/%: user/%.o user/crt.o
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
-kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
-	drivers/ata.o cpu/vectors.o cpu/idt.o cpu/gdt.o drivers/uart.o \
-	fs/fs.o lib/mem.o lib/string.o proc.o cpu/swtch.o drivers/pit.o
-	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x1000 $^
+kernel.bin: $(OBJECTS)
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
+
+bootmain.o: bootmain.c
+	$(CC) $(CFLAGS) -Os -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -85,14 +92,18 @@ kernel.bin: kernel.o console.o drivers/vga.o drivers/keyboard.o \
 %.o: %.S
 	$(CC) $(ASMFLAGS) $^ -o $@
 
-mbr.bin: mbr.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
+mbr.bin: mbr.elf tools/mbrpad
+	$(OBJCOPY) -S -O binary -j .text $< $@
+	tools/mbrpad $@
 
-mbr.elf: mbr.o
-	$(LD) -m elf_i386 -Ttext=0x7c00 $^ -o $@
+mbr.raw: mbr.o bootmain.o
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
+
+mbr.elf: mbr.o bootmain.o
+	$(LD) -N -m elf_i386 -Ttext=0x7c00 $^ -o $@
 
 clean:
-	rm -f *.elf *.img *.bin *.o */*.o tools/mkfs user/false
+	rm -f *.elf *.img *.bin *.raw *.o */*.o tools/mkfs ejudge.sh
 
 tools/%: tools/%.c
 	gcc -Wall -Werror -g $^ -o $@
