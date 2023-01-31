@@ -85,23 +85,18 @@ void register_interrupt_handler(uint8_t i, isr_t handler) {
 }
 
 void trap(registers_t *r) {
-    if (r->int_no == T_SYSCALL) {
-        switch (r->eax) {
-            case SYS_exit:
-                if (r->ebx == 0) {
-                    printk("* success\n");
-                } else {
-                    printk("* failure\n");
-                }
-                killproc();
-            case SYS_greet:
-                printk("Hello world!\n");
-                r->eax = 0;
-                break;
-            default:
-                printk("Unknown syscall\n");
-                r->eax = -1;
-        }
+    // EOI
+    if (r->int_no >= 40) {
+        port_byte_out(0xA0, 0x20); /* follower */
+    }
+    if (r->int_no >= 32) {
+        port_byte_out(0x20, 0x20); /* leader */
+    }
+
+    // Call registered handler
+    if (interrupt_handlers[r->int_no] != 0) {
+        isr_t handler = interrupt_handlers[r->int_no];
+        handler(r);
         return;
     }
 
@@ -112,19 +107,24 @@ void trap(registers_t *r) {
         }
         panic(msg);
     }
+}
 
-    /* Handle the interrupt in a more modular way */
-    if (interrupt_handlers[r->int_no] != 0) {
-        isr_t handler = interrupt_handlers[r->int_no];
-        handler(r);
-    }
-
-    // EOI
-    if (r->int_no >= 40) {
-        port_byte_out(0xA0, 0x20); /* follower */
-    }
-    if (r->int_no >= 32) {
-        port_byte_out(0x20, 0x20); /* leader */
+static void handle_syscall(registers_t* r) {
+    switch (r->eax) {
+        case SYS_exit:
+            if (r->ebx == 0) {
+                printk("* success\n");
+            } else {
+                printk("* failure\n");
+            }
+            killproc();
+        case SYS_greet:
+            printk("Hello world!\n");
+            r->eax = 0;
+            break;
+        default:
+            printk("Unknown syscall\n");
+            r->eax = -1;
     }
 }
 
@@ -165,6 +165,8 @@ void load_idt() {
     asm("lidt (%0)" : : "r"(&idt_reg));
 
     init_pic();
+
+    register_interrupt_handler(T_SYSCALL, handle_syscall);
 }
 
 void cli() {
