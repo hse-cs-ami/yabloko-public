@@ -41,6 +41,13 @@ ejudge.sh: image.bin
 	echo >>$@ "exec qemu-system-i386 -nographic -drive format=raw,file=image.bin -serial mon:stdio"
 	chmod +x $@
 
+diag:
+	-uname -a
+	-$(CC) --version
+	-$(LD) -v
+	-gcc --version
+	-ld -v
+
 debug-boot-nox: image.bin mbr.elf
 	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S &
 	$(GDB) mbr.elf \
