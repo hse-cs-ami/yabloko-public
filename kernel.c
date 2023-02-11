@@ -58,5 +58,8 @@ void _start() {
     vga_print_times("\n", 23);
     dump_screen();
 
+    vga_print("=^._.^=\n");
+    dump_screen();
+
     qemu_shutdown();
 }
