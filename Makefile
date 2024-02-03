@@ -10,13 +10,14 @@ OBJCOPY=x86_64-elf-objcopy
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
+		 -mno-sse \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASMFLAGS = -m32 -ffreestanding -c -g
 
 ifeq ($(LLVM),on)
 #AS=llvm-as
-LD=ld.lld
+LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
 CC=clang
 CFLAGS += -target elf-i386
 ASMFLAGS = -target elf-i386 -ffreestanding -c -g
@@ -32,6 +33,21 @@ run: image.bin
 
 run-nox: image.bin
 	qemu-system-i386 -nographic -drive format=raw,file=$< -serial mon:stdio
+
+ejudge.sh: image.bin
+	echo >$@ "#!/bin/sh"
+	echo >>$@ "base64 -d <<===EOF | gunzip >image.bin"
+	gzip <$^ | base64 >>$@
+	echo >>$@ "===EOF"
+	echo >>$@ "exec qemu-system-i386 -nographic -drive format=raw,file=image.bin -serial mon:stdio"
+	chmod +x $@
+
+diag:
+	-uname -a
+	-$(CC) --version
+	-$(LD) -v
+	-gcc --version
+	-ld -v
 
 debug-boot-nox: image.bin mbr.elf
 	qemu-system-i386 -nographic -drive format=raw,file=$< -s -S &

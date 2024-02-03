@@ -10,14 +10,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build disk image
       run: make image.bin
   llvm:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install lld
       run: sudo apt-get install -y lld
     - name: LLVM build
       run: make LLVM=on image.bin
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: install llvm
+      run: brew install llvm x86_64-elf-binutils x86_64-elf-gcc
+    - name: LLVM build
+      run: make LLVM=on image.bin
+
