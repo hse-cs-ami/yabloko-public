@@ -10,6 +10,7 @@ OBJCOPY=x86_64-elf-objcopy
 endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
+		 -mno-sse \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASMFLAGS = -m32 -ffreestanding -c -g
