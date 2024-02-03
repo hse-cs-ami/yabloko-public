@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install llvm
-      run: brew install llvm
+      run: brew install llvm x86_64-elf-binutils x86_64-elf-gcc
     - name: LLVM build
       run: make LLVM=on image.bin
 
