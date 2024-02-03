@@ -17,7 +17,7 @@ ASMFLAGS = -m32 -ffreestanding -c -g
 
 ifeq ($(LLVM),on)
 #AS=llvm-as
-LD=ld.lld
+LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
 CC=clang
 CFLAGS += -target elf-i386
 ASMFLAGS = -target elf-i386 -ffreestanding -c -g
