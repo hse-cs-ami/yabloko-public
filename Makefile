@@ -1,7 +1,14 @@
 GDB=gdb
 OBJCOPY=objcopy
+UNAME=uname
+CAT=cat
 
-ifeq ($(shell uname -s),Darwin)
+ifeq ($(OS),Windows_NT)
+	UNAME=ver
+	CAT=type
+endif
+
+ifeq ($(shell $(UNAME) -s),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
@@ -17,16 +24,20 @@ ASMFLAGS = -m32 -ffreestanding -c -g
 
 ifeq ($(LLVM),on)
 #AS=llvm-as
-LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
+ifeq ($(shell $(UNAME) -s),Darwin)
+	LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
+else
+	LD=ld.lld
+endif
 CC=clang
 CFLAGS += -target elf-i386
 ASMFLAGS = -target elf-i386 -ffreestanding -c -g
 LDKERNELFLAGS = --script=script.ld
 endif
 
-OBJECTS = kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
-	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o lib/mem.o proc.o lib/string.o \
-	fs/fs.o
+OBJECTS = ./kernel.o ./console.o ./drivers/vga.o ./drivers/uart.o ./drivers/keyboard.o \
+	./cpu/idt.o ./cpu/gdt.o ./cpu/swtch.o ./cpu/vectors.o ./lib/mem.o ./proc.o ./lib/string.o \
+	./fs/fs.o
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -43,7 +54,7 @@ ejudge.sh: image.bin
 	chmod +x $@
 
 diag:
-	-uname -a
+	-$(UNAME) -a
 	-$(CC) --version
 	-$(LD) -v
 	-gcc --version
@@ -85,8 +96,8 @@ debug-nox: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: kernel.bin tools/mkfs user/false user/greet user/div0
-	tools/mkfs $@ $< user/false user/greet user/div0
+fs.img: ./kernel.bin ./tools/mkfs ./user/false ./user/greet ./user/div0
+	./tools/mkfs $@ $< ./user/false ./user/greet ./user/div0
 
 LDFLAGS=-m elf_i386
 
@@ -94,7 +105,7 @@ user/%: user/%.o user/crt.o
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
 image.bin: mbr.bin fs.img
-	cat $^ >$@
+	$(CAT) $^ >$@
 
 kernel.bin: $(OBJECTS)
 	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
