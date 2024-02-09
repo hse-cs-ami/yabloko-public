@@ -105,9 +105,6 @@ LDFLAGS=-m elf_i386
 user/%: user/%.o user/crt.o
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
 
-image.bin: mbr.bin fs.img
-	$(CAT) $^ >$@
-
 kernel.bin: $(OBJECTS)
 	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
 
@@ -120,9 +117,9 @@ bootmain.o: bootmain.c
 %.o: %.S
 	$(CC) $(ASMFLAGS) $^ -o $@
 
-mbr.bin: mbr.elf tools/mbrpad
+image.bin: mbr.elf tools/mbrpad fs.img
 	$(OBJCOPY) -S -O binary -j .text $< $@
-	tools/mbrpad $@
+	tools/mbrpad $@ fs.img
 
 mbr.raw: mbr.o bootmain.o
 	$(LD) -N -m elf_i386 -Ttext=0x7c00 --oformat=binary $^ -o $@
