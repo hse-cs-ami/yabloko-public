@@ -1,14 +1,14 @@
 GDB=gdb
 OBJCOPY=objcopy
-UNAME=uname
 CAT=cat
 
 ifeq ($(OS),Windows_NT)
-	UNAME=ver
 	CAT=type
+else
+	OS=$(shell uname -s)
 endif
 
-ifeq ($(shell $(UNAME) -s),Darwin)
+ifeq ($(OS),Darwin)
 AS=x86_64-elf-as
 LD=x86_64-elf-ld
 CC=x86_64-elf-gcc
@@ -23,12 +23,13 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 ASMFLAGS = -m32 -ffreestanding -c -g
 
 ifeq ($(LLVM),on)
-#AS=llvm-as
-ifeq ($(shell $(UNAME) -s),Darwin)
+
+ifeq ($(OS),Darwin)
 	LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
 else
 	LD=ld.lld
 endif
+
 CC=clang
 CFLAGS += -target elf-i386
 ASMFLAGS = -target elf-i386 -ffreestanding -c -g
