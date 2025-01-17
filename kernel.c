@@ -14,7 +14,7 @@ asm(".asciz \"kernel start\\n\"");
 #include "proc.h"
 
 
-void _start() {
+void kmain() {
     load_gdt();
     init_keyboard();
     init_pit();

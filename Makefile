@@ -13,7 +13,7 @@ CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
 		 -mno-sse \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-ASMFLAGS = -m32 -ffreestanding -c -g
+ASMFLAGS = -m32 -ffreestanding -c -g -I.
 
 ifeq ($(LLVM),on)
 #AS=llvm-as
@@ -24,7 +24,7 @@ ASMFLAGS = -target elf-i386 -ffreestanding -c -g
 LDKERNELFLAGS = --script=script.ld
 endif
 
-OBJECTS = kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
+OBJECTS = kernel/kstart.o kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
 	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o lib/mem.o proc.o lib/string.o \
 	fs/fs.o drivers/ata.o lib/mem.o lib/string.o proc.o drivers/pit.o
 
@@ -91,13 +91,13 @@ fs.img: kernel.bin tools/mkfs user/false user/greet user/div0 user/shout
 LDFLAGS=-m elf_i386
 
 user/%: user/%.o user/crt.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x10000 $^
 
 image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: $(OBJECTS)
-	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0xf0009000 $^
 
 bootmain.o: bootmain.c
 	$(CC) $(CFLAGS) -Os -c $< -o $@

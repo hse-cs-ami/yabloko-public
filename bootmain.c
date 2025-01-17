@@ -40,7 +40,7 @@ bootmain(void)
   ph = (Elf32_Phdr*)((uchar*)elf + elf->e_phoff);
   eph = ph + elf->e_phnum;
   for(; ph < eph; ph++) {
-    pa = (uchar*)ph->p_paddr;
+    pa = (uchar*)(ph->p_paddr & 0x0fffffff);
     readseg(pa, ph->p_filesz, ph->p_offset);
     if(ph->p_memsz > ph->p_filesz)
       stosb(pa + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
@@ -48,7 +48,7 @@ bootmain(void)
 
   // Call the entry point from the ELF header.
   // Does not return!
-  entry = (void(*)(void))(elf->e_entry);
+  entry = (void(*)(void))(elf->e_entry & 0x0fffffff);
   entry();
 }
 
