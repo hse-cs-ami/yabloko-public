@@ -1,5 +1,5 @@
 #pragma once
 
-typedef unsigned size_t;
-
-void* kmalloc(size_t size);
+void freerange(void *vstart, void *vend);
+void* kalloc(void);
+void kfree(char*);

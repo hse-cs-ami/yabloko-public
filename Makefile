@@ -11,6 +11,7 @@ endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
 		 -mno-sse \
+		 -I. \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASMFLAGS = -m32 -ffreestanding -c -g -I.
@@ -75,7 +76,7 @@ debug: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
 	$(GDB) kernel.bin \
 		-ex "target remote localhost:1234" \
-		-ex "break _start" \
+		-ex "break kmain" \
 		-ex "continue"
 
 debug-nox: image.bin

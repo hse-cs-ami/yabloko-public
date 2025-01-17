@@ -36,8 +36,8 @@ void swtch(void** oldstack, void* newstack);
 
 void run_elf(const char* name) {
     if (!vm) {
-        vm = kmalloc(sizeof(struct vm));
-        vm->user_task = kmalloc(sizeof(struct task));
+        vm = kalloc();
+        vm->user_task = kalloc();
         switchuvm(&vm->user_task->tss, vm->user_task->stack.bottom);
     }
     if (read_file(name, (void*)USER_BASE, 100 << 20) <= 0) {

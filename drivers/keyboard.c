@@ -1,8 +1,9 @@
 #include "keyboard.h"
-#include "../cpu/isr.h"
-#include "../console.h"
+#include "cpu/isr.h"
+#include "cpu/memlayout.h"
+#include "console.h"
 #include "port.h"
-#include "../lib/mem.h"
+#include "lib/mem.h"
 
 static const char sc_ascii[] = {
     '?', '?', '1', '2', '3', '4', '5', '6',
@@ -12,7 +13,7 @@ static const char sc_ascii[] = {
     'b', 'n', 'm', ',', '.', '/', '?', '?', '?', ' ',
 };
 
-enum { kbd_buf_capacity = 1024 };
+enum { kbd_buf_capacity = PGSIZE };
 
 static void interrupt_handler(registers_t *r) {
     uint8_t scancode = port_byte_in(0x60);
@@ -30,7 +31,7 @@ char* kbd_buf;
 unsigned kbd_buf_size;
 
 void init_keyboard() {
-    kbd_buf = kmalloc(kbd_buf_capacity);
+    kbd_buf = kalloc();
 
     register_interrupt_handler(IRQ1, interrupt_handler);
 }
