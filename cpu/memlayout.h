@@ -5,7 +5,9 @@
 #define PHYSTOP  0x8000000
 
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
+#define PGROUNDDOWN(a) (((a)) & ~((uintptr_t)(PGSIZE-1)))
 
+#define PTXSHIFT        12      // offset of PTX in a linear address
 #define PDXSHIFT        22      // offset of PDX in a linear address
 
 #define PXMASK          0x3FF
@@ -17,6 +19,12 @@
 
 // page directory index
 #define PDX(va)         (((uintptr_t)(va) >> PDXSHIFT) & PXMASK)
+
+// page table index
+#define PTX(va)         (((uintptr_t)(va) >> PTXSHIFT) & PXMASK)
+
+// Address in page table or page directory entry
+#define PTE_ADDR(pte)   ((uintptr_t)(pte) & ~0xFFF)
 #endif
 
 // Page table/directory entry flags.

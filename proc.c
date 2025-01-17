@@ -3,6 +3,7 @@
 #include "fs/fs.h"
 #include "cpu/gdt.h"
 #include "cpu/isr.h"
+#include "cpu/memlayout.h"
 #include "kernel/mem.h"
 #include "lib/string.h"
 #include "console.h"
@@ -43,7 +44,10 @@ void run_elf(const char* name) {
     }
     if (!vm.user_task) {
         vm.user_task = kalloc();
-        switchuvm(&vm.user_task->tss, vm.user_task->stack.bottom);
+        vm.user_task->pgdir = setupkvm();
+        allocuvm(vm.user_task->pgdir, USER_BASE, USER_BASE + statbuf.size);
+        allocuvm(vm.user_task->pgdir, USER_STACK_BASE - 2 * PGSIZE, USER_STACK_BASE);
+        switchuvm(&vm.user_task->tss, vm.user_task->stack.bottom, vm.user_task->pgdir);
     }
     if (read_file(&statbuf, (void*)USER_BASE, 100 << 20) <= 0) {
         printk(name);
@@ -75,6 +79,7 @@ void run_elf(const char* name) {
 
 _Noreturn void killproc() {
     void* task_stack;
+    switchkvm();
     swtch(&task_stack, vm.kernel_thread);
     __builtin_unreachable();
 }

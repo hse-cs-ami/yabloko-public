@@ -92,7 +92,7 @@ fs.img: kernel.bin tools/mkfs user/false user/greet user/div0 user/shout
 LDFLAGS=-m elf_i386
 
 user/%: user/%.o user/crt.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x10000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x401000 $^
 
 image.bin: mbr.bin fs.img
 	cat $^ >$@

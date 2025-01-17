@@ -29,6 +29,7 @@
 #define KERN_STACK_BASE  0x90000
 
 #ifndef __ASSEMBLER__
+#include "kernel/mem.h"
 typedef unsigned uint;
 typedef unsigned short ushort;
 
@@ -73,5 +74,5 @@ struct taskstate {
 };
 
 void load_gdt();
-void switchuvm(struct taskstate *tss, void* esp);
+void switchuvm(struct taskstate *tss, void* esp, pde_t *pgdir);
 #endif

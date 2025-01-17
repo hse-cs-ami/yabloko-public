@@ -1,4 +1,6 @@
 #include "gdt.h"
+#include "x86.h"
+#include "memlayout.h"
 #include "../lib/string.h"
 #include "kernel/mem.h"
 
@@ -52,7 +54,7 @@ void load_gdt() {
     asm("lgdt %0": : "m"(gdt_desc));
 }
 
-void switchuvm(struct taskstate *tss, void* esp) {
+void switchuvm(struct taskstate *tss, void* esp, pde_t *pgdir) {
     memset(tss, 0, sizeof(*tss));
     seg_desc[SEG_TSS] = SEG16(STS_T32A, tss, sizeof(*tss)-1, 0);
     seg_desc[SEG_TSS].s = 0;
@@ -63,4 +65,6 @@ void switchuvm(struct taskstate *tss, void* esp) {
     tss->iomb = (ushort) 0xFFFF;
 
     asm("ltr %0": : "r"((ushort)(SEG_TSS << 3)));
+
+    lcr3(V2P(pgdir));
 }

@@ -11,4 +11,7 @@ void freerange(void *vstart, void *vend);
 void* kalloc(void);
 void kfree(char*);
 
+pde_t *setupkvm();
 void kvmalloc();
+void switchkvm();
+int allocuvm(pde_t *pgdir, uintptr_t base, uintptr_t top);
