@@ -41,7 +41,7 @@ memset(void *dst, unsigned c, uint64_t n)
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
 void
-kfree(char *v)
+kfree(void *v)
 {
   struct run *r;
 
@@ -51,7 +51,7 @@ kfree(char *v)
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
 
-  r = (struct run*)v;
+  r = v;
   r->next = kmem.freelist;
   kmem.freelist = r;
 }

@@ -44,11 +44,12 @@ void run_elf(const char* name) {
     }
     if (!vm.user_task) {
         vm.user_task = kalloc();
-        vm.user_task->pgdir = setupkvm();
-        allocuvm(vm.user_task->pgdir, USER_BASE, USER_BASE + statbuf.size);
-        allocuvm(vm.user_task->pgdir, USER_STACK_BASE - 2 * PGSIZE, USER_STACK_BASE);
-        switchuvm(&vm.user_task->tss, vm.user_task->stack.bottom, vm.user_task->pgdir);
     }
+    vm.user_task->pgdir = setupkvm();
+    allocuvm(vm.user_task->pgdir, USER_BASE, USER_BASE + statbuf.size);
+    allocuvm(vm.user_task->pgdir, USER_STACK_BASE - 2 * PGSIZE, USER_STACK_BASE);
+    switchuvm(&vm.user_task->tss, vm.user_task->stack.bottom, vm.user_task->pgdir);
+
     if (read_file(&statbuf, (void*)USER_BASE, 100 << 20) <= 0) {
         printk(name);
         printk(": file not found\n");
@@ -80,6 +81,7 @@ void run_elf(const char* name) {
 _Noreturn void killproc() {
     void* task_stack;
     switchkvm();
+    freevm(vm.user_task->pgdir);
     swtch(&task_stack, vm.kernel_thread);
     __builtin_unreachable();
 }
