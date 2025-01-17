@@ -38,7 +38,8 @@ struct dir {
 
 struct stat {
 	uint32_t size;
-	uint32_t reserved[3];
+	uint32_t start_sector;
+	uint32_t reserved1, reserved2;
 };
 
 /* Find file by name and fill information in buf.
@@ -48,4 +49,4 @@ int stat(const char* name, struct stat *buf);
 /* Find file by name and read it into buffer with size bufsize.
  * At most (bufsize & ~511) bytes will be read.
  * Return number of bytes read or -1 on failure. */
-int read_file(const char* name, void* buf, uint32_t bufsize);
+int read_file(const struct stat *statbuf, void* buf, uint32_t bufsize);

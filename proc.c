@@ -23,31 +23,36 @@ struct kstack {
 struct task {
     struct taskstate tss;
     struct kstack stack;
+    pde_t *pgdir;
 };
 
 struct vm {
     void *kernel_thread;
-    void *user_thread;
     struct task *user_task;
-} *vm;
+} vm;
 
 void trapret();
 void swtch(void** oldstack, void* newstack);
 
 void run_elf(const char* name) {
-    if (!vm) {
-        vm = kalloc();
-        vm->user_task = kalloc();
-        switchuvm(&vm->user_task->tss, vm->user_task->stack.bottom);
+    struct stat statbuf;
+    if (stat(name, &statbuf) != 0) {
+        printk(name);
+        printk(": file not found\n");
+        return;
     }
-    if (read_file(name, (void*)USER_BASE, 100 << 20) <= 0) {
+    if (!vm.user_task) {
+        vm.user_task = kalloc();
+        switchuvm(&vm.user_task->tss, vm.user_task->stack.bottom);
+    }
+    if (read_file(&statbuf, (void*)USER_BASE, 100 << 20) <= 0) {
         printk(name);
         printk(": file not found\n");
         return;
     }
     Elf32_Ehdr *hdr = (void*)USER_BASE;
 
-    struct kstack *u = &vm->user_task->stack;
+    struct kstack *u = &vm.user_task->stack;
     memset(u, 0, sizeof(*u));
     u->context.eip = (uint32_t)trapret;
 
@@ -63,13 +68,13 @@ void run_elf(const char* name) {
     tf->useresp = USER_STACK_BASE;
 
     // initialization done, now switch to the process
-    swtch(&vm->kernel_thread, &u->context);
+    swtch(&vm.kernel_thread, &u->context);
 
     // process has finished
 }
 
 _Noreturn void killproc() {
     void* task_stack;
-    swtch(&task_stack, vm->kernel_thread);
+    swtch(&task_stack, vm.kernel_thread);
     __builtin_unreachable();
 }

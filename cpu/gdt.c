@@ -32,10 +32,10 @@ struct seg_desc_t {
 struct seg_desc_t seg_desc[6];
 
 void init_seg_desc() {
-    seg_desc[SEG_KCODE] = SEG(STA_X|STA_R, 0,         0xffffffff, 0);
-    seg_desc[SEG_KDATA] = SEG(STA_W,       0,         0xffffffff, 0);
-    seg_desc[SEG_UCODE] = SEG(STA_X|STA_R, USER_BASE, 0xffffffff - USER_BASE, DPL_USER);
-    seg_desc[SEG_UDATA] = SEG(STA_W,       USER_BASE, 0xffffffff - USER_BASE, DPL_USER);
+    seg_desc[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
+    seg_desc[SEG_KDATA] = SEG(STA_W,       0, 0xffffffff, 0);
+    seg_desc[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
+    seg_desc[SEG_UDATA] = SEG(STA_W,       0, 0xffffffff, DPL_USER);
 }
 
 struct gdt_desc_t {
