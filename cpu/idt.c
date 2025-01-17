@@ -105,6 +105,13 @@ void trap(registers_t *r) {
         if (r->int_no < ARRLEN(exception_messages)) {
             msg = exception_messages[r->int_no];
         }
+        if (r->cs & 3) {
+            // exception from user mode, kill offending process
+            printk("Exception: ");
+            printk(msg);
+            printk("\n");
+            killproc();
+        }
         panic(msg);
     }
 }

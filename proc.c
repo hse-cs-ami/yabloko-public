@@ -82,6 +82,7 @@ _Noreturn void killproc() {
     void* task_stack;
     switchkvm();
     freevm(vm.user_task->pgdir);
+    sti();
     swtch(&task_stack, vm.kernel_thread);
     __builtin_unreachable();
 }
