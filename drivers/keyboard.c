@@ -3,7 +3,7 @@
 #include "cpu/memlayout.h"
 #include "console.h"
 #include "port.h"
-#include "lib/mem.h"
+#include "kernel/mem.h"
 
 static const char sc_ascii[] = {
     '?', '?', '1', '2', '3', '4', '5', '6',

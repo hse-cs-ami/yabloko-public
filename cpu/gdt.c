@@ -1,5 +1,6 @@
 #include "gdt.h"
 #include "../lib/string.h"
+#include "kernel/mem.h"
 
 #include <stdint.h>
 

@@ -1,7 +1,8 @@
 #include "port.h"
 #include "../lib/string.h"
+#include "cpu/memlayout.h"
 
-static char* const video_memory = (char*) 0xb8000;
+static char* const video_memory = (char*) (KERNBASE + 0xb8000);
 
 enum colors16 {
     black = 0,

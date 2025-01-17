@@ -3,7 +3,7 @@
 #include "fs/fs.h"
 #include "cpu/gdt.h"
 #include "cpu/isr.h"
-#include "lib/mem.h"
+#include "kernel/mem.h"
 #include "lib/string.h"
 #include "console.h"
 

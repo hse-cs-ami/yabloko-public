@@ -24,9 +24,14 @@ _start:
     // Set up the page table for the lowest 4 MiB: PD[0] -> PT
     mov dword ptr [0x1000], 0x2000 | 0x3
 
-    // KERNBASE = 0xF000_0000
-    // Use the same page table for the first 4 MiB after KERNBASE: PD[0x3c0] -> PT
-    mov dword ptr [0x1000 + (0x3c0 * 4)], 0x2000 | 0x3
+    // KERNBASE = 0x8000_0000
+    // Use the same page table for the first 4 MiB after KERNBASE: PD[0x200] -> PT
+    mov dword ptr [0x1000 + ((KERNBASE >> 22) * 4)], 0x2000 | 0x3
+
+    // Enable 4 MiB pages
+    mov eax, cr4
+    or eax, 0x10        // Set the PSE bit (bit 4)
+    mov cr4, eax
 
     // Identity map the first 2 MiB
     mov edi, 0x2000      // Start of the PT

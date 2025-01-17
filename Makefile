@@ -26,8 +26,8 @@ LDKERNELFLAGS = --script=script.ld
 endif
 
 OBJECTS = kernel/kstart.o kernel.o console.o drivers/vga.o drivers/uart.o drivers/keyboard.o \
-	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o lib/mem.o proc.o lib/string.o \
-	fs/fs.o drivers/ata.o lib/mem.o lib/string.o proc.o drivers/pit.o
+	cpu/idt.o cpu/gdt.o cpu/swtch.o cpu/vectors.o kernel/mem.o proc.o lib/string.o \
+	fs/fs.o drivers/ata.o lib/string.o proc.o drivers/pit.o kernel/vm.o
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -98,7 +98,7 @@ image.bin: mbr.bin fs.img
 	cat $^ >$@
 
 kernel.bin: $(OBJECTS)
-	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0xf0009000 $^
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x80009000 $^
 
 bootmain.o: bootmain.c
 	$(CC) $(CFLAGS) -Os -c $< -o $@
