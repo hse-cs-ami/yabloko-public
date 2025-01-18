@@ -18,9 +18,10 @@ endif
 
 CFLAGS = -fno-pic -ffreestanding -static -fno-builtin -fno-strict-aliasing \
 		 -mno-sse \
+		 -I. \
 		 -Wall -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-ASMFLAGS = -m32 -ffreestanding -c -g
+ASMFLAGS = -m32 -ffreestanding -c -g -I.
 
 ifeq ($(LLVM),on)
 
@@ -38,7 +39,7 @@ endif
 
 OBJECTS = ./kernel.o ./console.o ./drivers/vga.o ./drivers/uart.o ./drivers/keyboard.o \
 	./cpu/idt.o ./cpu/gdt.o ./cpu/swtch.o ./cpu/vectors.o ./lib/mem.o ./proc.o ./lib/string.o \
-	./fs/fs.o
+	./fs/fs.o ./drivers/ata.o ./lib/string.o ./proc.o ./drivers/pit.o ./kernel/vm.o
 
 run: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -serial mon:stdio
@@ -87,7 +88,7 @@ debug: image.bin
 	qemu-system-i386 -drive format=raw,file=$< -s -S &
 	$(GDB) kernel.bin \
 		-ex "target remote localhost:1234" \
-		-ex "break _start" \
+		-ex "break kmain" \
 		-ex "continue"
 
 debug-nox: image.bin
@@ -97,16 +98,16 @@ debug-nox: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: ./kernel.bin ./tools/mkfs ./user/false ./user/greet ./user/div0
-	./tools/mkfs $@ $< ./user/false ./user/greet ./user/div0
+fs.img: ./kernel.bin ./tools/mkfs ./user/false ./user/greet ./user/div0 ./user/shout
+	./tools/mkfs $@ $< ./user/false ./user/greet ./user/div0 ./user/shout
 
 LDFLAGS=-m elf_i386
 
 user/%: user/%.o user/crt.o
-	$(LD) $(LDFLAGS) -o $@ -Ttext 0x1000 $^
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x401000 $^
 
 kernel.bin: $(OBJECTS)
-	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x9000 $^
+	$(LD) $(LDFLAGS) $(LDKERNELFLAGS) -o $@ -Ttext 0x80009000 $^
 
 bootmain.o: bootmain.c
 	$(CC) $(CFLAGS) -Os -c $< -o $@

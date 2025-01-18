@@ -1,5 +1,8 @@
 #include "gdt.h"
+#include "x86.h"
+#include "memlayout.h"
 #include "../lib/string.h"
+#include "kernel/mem.h"
 
 #include <stdint.h>
 
@@ -31,10 +34,10 @@ struct seg_desc_t {
 struct seg_desc_t seg_desc[6];
 
 void init_seg_desc() {
-    seg_desc[SEG_KCODE] = SEG(STA_X|STA_R, 0,         0xffffffff, 0);
-    seg_desc[SEG_KDATA] = SEG(STA_W,       0,         0xffffffff, 0);
-    seg_desc[SEG_UCODE] = SEG(STA_X|STA_R, USER_BASE, 0xffffffff - USER_BASE, DPL_USER);
-    seg_desc[SEG_UDATA] = SEG(STA_W,       USER_BASE, 0xffffffff - USER_BASE, DPL_USER);
+    seg_desc[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
+    seg_desc[SEG_KDATA] = SEG(STA_W,       0, 0xffffffff, 0);
+    seg_desc[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
+    seg_desc[SEG_UDATA] = SEG(STA_W,       0, 0xffffffff, DPL_USER);
 }
 
 struct gdt_desc_t {
@@ -51,7 +54,7 @@ void load_gdt() {
     asm("lgdt %0": : "m"(gdt_desc));
 }
 
-void switchuvm(struct taskstate *tss, void* esp) {
+void switchuvm(struct taskstate *tss, void* esp, pde_t *pgdir) {
     memset(tss, 0, sizeof(*tss));
     seg_desc[SEG_TSS] = SEG16(STS_T32A, tss, sizeof(*tss)-1, 0);
     seg_desc[SEG_TSS].s = 0;
@@ -62,4 +65,6 @@ void switchuvm(struct taskstate *tss, void* esp) {
     tss->iomb = (ushort) 0xFFFF;
 
     asm("ltr %0": : "r"((ushort)(SEG_TSS << 3)));
+
+    lcr3(V2P(pgdir));
 }

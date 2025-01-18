@@ -3,7 +3,7 @@
 #include "drivers/uart.h"
 
 void printk(const char* msg) {
-    vga_print_string_noscroll(msg);
+    vga_print_string(msg);
     for (; *msg; ++msg) {
         uartputc(*msg);
     }

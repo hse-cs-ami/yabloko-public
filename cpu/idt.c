@@ -105,8 +105,30 @@ void trap(registers_t *r) {
         if (r->int_no < ARRLEN(exception_messages)) {
             msg = exception_messages[r->int_no];
         }
+        if (r->cs & 3) {
+            // exception from user mode, kill offending process
+            printk("Exception: ");
+            printk(msg);
+            printk("\n");
+            killproc();
+        }
         panic(msg);
     }
+}
+
+static void* get_userspace_ptr(uint32_t ptr) {
+    if (ptr >= 0xffffffff - USER_BASE) {
+        return 0;
+    }
+    return (void*)(ptr + USER_BASE);
+}
+
+static int handle_puts(const char* s) {
+    if (!s) {
+        return -1;
+    }
+    printk(s);
+    return 0;
 }
 
 static void handle_syscall(registers_t* r) {
@@ -121,6 +143,13 @@ static void handle_syscall(registers_t* r) {
         case SYS_greet:
             printk("Hello world!\n");
             r->eax = 0;
+            break;
+        case SYS_putc:
+            printk((const char[]){r->ebx, '\0'});
+            r->eax = 0;
+            break;
+        case SYS_puts:
+            r->eax = handle_puts(get_userspace_ptr(r->ebx));
             break;
         default:
             printk("Unknown syscall\n");

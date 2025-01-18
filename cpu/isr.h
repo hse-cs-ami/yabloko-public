@@ -21,19 +21,17 @@ enum {
 };
 
 /* Struct which aggregates many registers.
- * It matches exactly the pushes on vectors.S. From the bottom:
- * - pushed by the processor automatically
+ * It matches exactly the pushes on interrupt.asm. From the bottom:
+ * - Pushed by the processor automatically
  * - `push byte`s on the isr-specific code: error code, then int number
- * - segment registers
- * - all the registers by pusha
+ * - All the registers by pusha
+ * - `push eax` whose lower 16-bits contain DS
  */
 typedef struct {
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; /* Pushed by pusha. */
-    uint32_t gs, fs, es, ds;
-    uint32_t int_no, err_code; // Interrupt number and error code (if applicable)
-    uint32_t eip, cs, eflags;  // Pushed by the processor automatically
-
-    uint32_t useresp, ss;      // Pushed by the processor for userspace interrupts
+    uint32_t gs, fs, es, ds; /* Data segment selector */
+    uint32_t int_no, err_code; /* Interrupt number and error code (if applicable) */
+    uint32_t eip, cs, eflags, useresp, ss; /* Pushed by the processor automatically */
 } registers_t;
 
 void isr_install();

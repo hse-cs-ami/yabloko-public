@@ -1,7 +1,6 @@
 *.o
-*.bin
 *.img
+*.bin
 *.elf
 *.dSYM
 tools/mkfs
-ejudge.sh
