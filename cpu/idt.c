@@ -1,5 +1,6 @@
 #include "isr.h"
 #include "gdt.h"
+#include "memlayout.h"
 #include "../syscall.h"
 #include "../proc.h"
 #include "../drivers/port.h"
@@ -117,10 +118,11 @@ void trap(registers_t *r) {
 }
 
 static void* get_userspace_ptr(uint32_t ptr) {
-    if (ptr >= 0xffffffff - USER_BASE) {
+    if (ptr > KERNBASE) {
         return 0;
     }
-    return (void*)(ptr + USER_BASE);
+    // FIXME: check if ptr is mapped and a valid 0-terminated string
+    return (void*)(ptr);
 }
 
 static int handle_puts(const char* s) {
