@@ -23,8 +23,8 @@ struct kstack {
 
 struct task {
     struct taskstate tss;
-    struct kstack stack;
     pde_t *pgdir;
+    struct kstack stack;
 };
 
 struct vm {

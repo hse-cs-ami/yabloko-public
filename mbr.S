@@ -3,16 +3,6 @@
     .code16
     .global _start
 _start:
-    mov $banner, %si
-    call print_string
-
-    call switch_to_32bit
-
-    hlt
-    jmp . // loop forever
-
-
-switch_to_32bit:
     mov	$2, %al
     out	%al, $0x92          // enable A20
 
@@ -38,24 +28,6 @@ init_32bit:
 
     call bootmain           // 7. load and run kernel
     jmp .                   // 8. loop forever
-
-
-.code16
-print_string:
-    mov $0x0e, %ah  // "teletype output"
-repeat:
-    lodsb           // equivalent to mov (%si), %al; inc %si
-
-    test %al, %al
-    je done
-
-    int $0x10       // bios interrupt
-    jmp repeat
-done:
-    ret
-
-banner:
-    .asciz "Loader \n"
 
     .balign 4
 gdt_start:

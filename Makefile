@@ -26,14 +26,14 @@ ASMFLAGS = -m32 -ffreestanding -c -g -I.
 ifeq ($(LLVM),on)
 
 ifeq ($(OS),Darwin)
-	LD=PATH=/usr/local/opt/llvm/bin:$(PATH) ld.lld
+	LD=PATH=/usr/local/opt/llvm/bin:"$(PATH)" ld.lld
 else
 	LD=ld.lld
 endif
 
 CC=clang
 CFLAGS += -target elf-i386
-ASMFLAGS = -target elf-i386 -ffreestanding -c -g
+ASMFLAGS += -target elf-i386
 LDKERNELFLAGS = --script=script.ld
 endif
 
