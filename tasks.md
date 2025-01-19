@@ -49,7 +49,7 @@ is configured to generate an interrupt approximately 100 times per second.
 You can arrange for your handler to be called every time this happens
 with `add_timer_callback(my_handler)` somewhere inside `kmain`.
 
-Your task is to draw a blue spinner in the upper right corner of the screen,
+Your task is to draw a white-on-black spinner in the upper right corner of the screen,
 rotating once per second. The spinner can be drawn by displaying the next symbol
 in the sequence `↑/→\↓/←\`. The arrows have codes 0x18-0x1b in the encoding
 used by the simulated terminal ([CP437](https://en.wikipedia.org/wiki/Code_page_437)).
