@@ -98,8 +98,10 @@ debug-nox: image.bin
 		-ex "break _start" \
 		-ex "continue"
 
-fs.img: ./kernel.bin ./tools/mkfs ./user/false ./user/greet ./user/div0 ./user/shout
-	./tools/mkfs $@ $< ./user/false ./user/greet ./user/div0 ./user/shout
+USERPROGS=./user/false ./user/greet ./user/div0 ./user/shout ./user/badputs ./user/bss
+
+fs.img: ./kernel.bin ./tools/mkfs $(USERPROGS)
+	./tools/mkfs $@ $< $(USERPROGS)
 
 LDFLAGS=-m elf_i386
 

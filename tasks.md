@@ -62,7 +62,8 @@ Yabloko does not honor the size of `.bss` that your program requests.
 Instead, it [reads your program file](https://gitlab.myltsev.ru/caos/hw/yabloko/-/blob/main/proc.c#L53)
 into memory, reserving just enough pages that it fits. If you create a large
 `.bss` with (for example) `static char zeroes[8000]`, then accessing `zeroes[7000]` will
-cause a page fault (try this out).
+cause a page fault (try running the program in `user/bss.c` by typing `run bss` at
+the Yabloko prompt).
 
 Fix this by parsing the header of the executable file and mapping the required amount
 of pages. We already have the header structure `hdr` in [proc.c](https://gitlab.myltsev.ru/caos/hw/yabloko/-/blob/main/proc.c#L58).
@@ -83,7 +84,7 @@ This task requires understanding of virtual memory mappings and the memory
 layout of Yabloko. Contact [@myltsev](https://t.me/myltsev) if you attempt
 this and get stuck.
 
-The `shout` executable [demonstrates](https://gitlab.myltsev.ru/caos/hw/yabloko/-/blob/main/user/shout.c#L14)
+The `badputs` executable [demonstrates](https://gitlab.myltsev.ru/caos/hw/yabloko/-/blob/main/user/badputs.c#L14)
 the use of the `SYS_puts` system call. It supplies the string pointer as an argument
 of the system call, and the string is printed to the screen.
 
@@ -96,7 +97,7 @@ It is easy to cause a panic by supplying a random value:
 
 Your task is to check if the pointer actually points to a valid zero-terminated string,
 completing a [FIXME](https://gitlab.myltsev.ru/caos/hw/yabloko/-/blob/main/cpu/idt.c#L124)
-in the code.
+in the code. As a result, `run badputs` should no longer cause a kernel panic.
 
 ### Figuring out the size of mapped memory after the pointer
 During the handling of this system call, the page table of the calling process
