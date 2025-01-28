@@ -73,7 +73,7 @@ void vga_clear_screen() {
 }
 
 static unsigned scroll() {
-    kmemmove(video_memory, video_memory + COLS, 2 * COLS * (ROWS-1));
+    kmemmove(video_memory, video_memory + 2 * COLS, 2 * COLS * (ROWS-1));
     for (int col = 0; col < COLS; col++) {
         vga_set_char(get_offset(col, ROWS - 1), ' ');
     }
@@ -90,7 +90,7 @@ void vga_print_string(const char* s) {
             offset++;
         }
         s++;
-        if (offset > COLS * ROWS) {
+        if (offset >= COLS * ROWS) {
             offset = scroll();
         }
     }
