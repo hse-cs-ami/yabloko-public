@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 static inline void
 stosl(void *addr, int data, int cnt)

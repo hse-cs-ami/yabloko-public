@@ -13,6 +13,22 @@
 #include "proc.h"
 #include "kernel/mem.h"
 
+void vga_set_pixel(int x, int y, int color) {
+    unsigned char* pixel = (unsigned char*) (KERNBASE + 0xA0000 + 320 * y + x);
+    *pixel = color;
+}
+
+void graphtest() {
+    vgaMode13();
+    for (int i = 0; i < 320; ++i) {
+        for (int j = 0; j < 200; ++j) {
+            vga_set_pixel(i, j, (i+j)/2);
+        }
+    }
+    msleep(5000);
+    vgaMode3();
+    vga_clear_screen();
+}
 
 void kmain() {
     freerange(P2V(1u<<20), P2V(2u<<20)); // 1MB - 2MB
@@ -43,6 +59,8 @@ void kmain() {
                 kbd_buf[kbd_buf_size-1] = '\0';
                 const char* cmd = kbd_buf + 4;
                 run_elf(cmd);
+            } else if (!strncmp("graphtest", kbd_buf, 9)) {
+                graphtest();
             } else {
                 printk("unknown command, try: halt | run CMD");
             }
